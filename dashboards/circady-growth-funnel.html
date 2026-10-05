@@ -1,495 +1,501 @@
-<title>Circady Growth Funnel</title>
+<title>Circady SEO & AEO Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: operator dashboard read top to bottom as the purchase funnel (awareness → consideration → conversion → store health), summary first. */
+/* Layout: the client SEO funnel template — summary, KPI row, then top / middle / bottom of funnel and SEO+AEO health — fed by Shopify. */
 :root{
-  --bg:#f3f5f8; --surface:#ffffff; --sunken:#eef1f6; --ink:#121a2b; --muted:#5d6779; --line:#dde2ea;
-  --night:#2b3a7a; --night-soft:#e7eaf7; --dawn:#c26a12; --dawn-soft:#fbefe1;
-  --good:#1f7a4d; --good-soft:#e3f3ea; --bad:#b4322b; --bad-soft:#fbe7e5;
-  --bar:#4f5fb0; --bar-dim:#c3c9e6; --grid:#e6e9f0;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r:12px;
+  --bg:#f4f7fb; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --track:#edf2f7; --sunken:#f8fafc;
+  --primary:#2f63ff; --primary-2:#6d8cff; --primary-soft:#eaf0ff;
+  --ai:#7c4ddb; --ai-soft:#f1ebfd;
+  --green:#16a34a; --green-soft:#eaf8ef; --amber:#d97706; --amber-soft:#fff5e7; --red:#dc2626; --red-soft:#fdecec;
+  --shadow:0 8px 24px rgba(15,23,42,.06); --radius:18px;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#0e1320; --surface:#161c2c; --sunken:#1c2336; --ink:#e7eaf2; --muted:#98a1b5; --line:#283048;
-  --night:#9eabf0; --night-soft:#232c4d; --dawn:#f0a95a; --dawn-soft:#3a2a17;
-  --good:#5fcb94; --good-soft:#173326; --bad:#f08a82; --bad-soft:#3d1d1b;
-  --bar:#8291e0; --bar-dim:#3a4470; --grid:#232b40; color-scheme:dark }}
+  --bg:#0b1120; --card:#131b2e; --ink:#e6ebf5; --muted:#94a3b8; --line:#243049; --track:#1e293f; --sunken:#18213a;
+  --primary:#7b9bff; --primary-2:#a7baff; --primary-soft:#1c2a52;
+  --ai:#b39af0; --ai-soft:#2b2247;
+  --green:#4ade80; --green-soft:#12301f; --amber:#fbbf24; --amber-soft:#3a2a0e; --red:#f87171; --red-soft:#3b1717;
+  --shadow:0 8px 24px rgba(0,0,0,.35); color-scheme:dark }}
 :root[data-theme="dark"]{
-  --bg:#0e1320; --surface:#161c2c; --sunken:#1c2336; --ink:#e7eaf2; --muted:#98a1b5; --line:#283048;
-  --night:#9eabf0; --night-soft:#232c4d; --dawn:#f0a95a; --dawn-soft:#3a2a17;
-  --good:#5fcb94; --good-soft:#173326; --bad:#f08a82; --bad-soft:#3d1d1b;
-  --bar:#8291e0; --bar-dim:#3a4470; --grid:#232b40; color-scheme:dark }
+  --bg:#0b1120; --card:#131b2e; --ink:#e6ebf5; --muted:#94a3b8; --line:#243049; --track:#1e293f; --sunken:#18213a;
+  --primary:#7b9bff; --primary-2:#a7baff; --primary-soft:#1c2a52;
+  --ai:#b39af0; --ai-soft:#2b2247;
+  --green:#4ade80; --green-soft:#12301f; --amber:#fbbf24; --amber-soft:#3a2a0e; --red:#f87171; --red-soft:#3b1717;
+  --shadow:0 8px 24px rgba(0,0,0,.35); color-scheme:dark }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
-.shell{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:28px 40px;display:grid;gap:22px}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
-.num,td.n,.mono{font-variant-numeric:tabular-nums}
-.mono{font-family:var(--f-mono)}
-.eyebrow{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--night)}
-.muted{color:var(--muted)}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+.shell{max-width:1440px;margin:0 auto;padding-inline:28px;padding-block:28px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:22px}
+.eyebrow{color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+h1{font-size:32px;line-height:1.1;margin:0 0 8px;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:14px;max-width:70ch}
+.period{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);font-size:13px;color:var(--muted);display:grid;gap:8px;min-width:250px}
+.period strong{display:block;color:var(--ink);font-size:14px}
+.seg{display:inline-flex;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{font:inherit;font-size:12px;border:0;background:transparent;color:var(--muted);padding:5px 10px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--primary);color:#fff;font-weight:700}
+.seg button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.live{display:flex;align-items:center;gap:7px;font-size:11px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.live[data-s="live"] i{background:var(--green)} .live[data-s="warn"] i{background:var(--amber)} .live[data-s="bad"] i{background:var(--red)}
 
-.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
-.topbar h1{font-size:30px;line-height:1.1;margin-block:6px 6px}
-.topbar p{margin:0;color:var(--muted);max-width:62ch}
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
-.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--night);color:var(--surface);font-weight:600}
-.seg button:focus-visible,.btn:focus-visible{outline:2px solid var(--night);outline-offset:2px}
-.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:10px;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:default}
-.status{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
-.status .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
-.status[data-s="live"] .dot{background:var(--good)}
-.status[data-s="warn"] .dot{background:var(--dawn)}
-.status[data-s="bad"] .dot{background:var(--bad)}
+.executive{display:grid;grid-template-columns:1.4fr .6fr;gap:18px;margin-bottom:22px}
+.hero,.summary-card,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0}
+.hero{padding:24px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:linear-gradient(135deg,var(--primary-soft),transparent);right:-70px;top:-80px;pointer-events:none}
+.hero h2{font-size:18px;margin:0 0 8px}
+.hero p{margin:0 0 18px;color:var(--muted);font-size:14px;max-width:780px;line-height:1.6;position:relative}
+.status-row{display:flex;flex-wrap:wrap;gap:10px;position:relative}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:700}
+.chip.good{background:var(--green-soft);color:var(--green)} .chip.neutral{background:var(--primary-soft);color:var(--primary)}
+.chip.warn{background:var(--amber-soft);color:var(--amber)} .chip.bad{background:var(--red-soft);color:var(--red)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.summary-card{padding:22px}
+.summary-card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px}
+.summary-card .big{font-size:36px;font-weight:800;letter-spacing:-.04em;margin-bottom:4px}
+.delta{font-size:12px;font-weight:700}
+.delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--muted)}
+.mini{font-size:12px;color:var(--muted)}
 
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
-.exec{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
-.hero h2{font-size:19px;margin-bottom:8px}
-.hero p{margin:0 0 16px;color:var(--muted);max-width:72ch}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
-.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.chip.good{background:var(--good-soft);color:var(--good)}
-.chip.warn{background:var(--dawn-soft);color:var(--dawn)}
-.chip.bad{background:var(--bad-soft);color:var(--bad)}
-.chip.info{background:var(--night-soft);color:var(--night)}
-.headline .label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.headline .big{font-family:var(--f-display);font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-block:6px 2px}
-.delta{font-size:12px;font-weight:600}
-.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.flat{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.kpi.pending{border-style:dashed;box-shadow:none;background:var(--sunken)}
+.kpi .label{font-size:12px;color:var(--muted);margin-bottom:9px}
+.kpi .value{font-size:24px;font-weight:800;letter-spacing:-.03em}
+.kpi.pending .value{color:var(--muted)}
+.kpi .foot{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:11px;color:var(--muted)}
 
-.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
-.kpi .label{font-size:12px;color:var(--muted)}
-.kpi .value{font-family:var(--f-display);font-size:26px;font-weight:700;margin-block:6px 4px}
-.kpi .foot{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
-.src{font-family:var(--f-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-
-.stage{display:grid;gap:14px}
-.stage-head{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
-.step{flex:none;width:34px;height:34px;border-radius:9px;background:var(--night-soft);color:var(--night);display:grid;place-items:center;font-family:var(--f-mono);font-weight:500;font-size:13px}
-.stage-head h2{font-size:20px}
-.stage-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
-.note{font-size:12px;color:var(--dawn);margin:4px 0 0}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 12px}
+.section-title{display:flex;align-items:center;gap:10px}
+.section-number{width:32px;height:32px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.section-title h2{font-size:20px;margin:0;text-wrap:balance}
+.section-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.note{color:var(--amber)!important;font-size:12px!important}
 .note:empty{display:none}
-.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px}
-.panel h3{font-size:15px;margin-bottom:12px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.panel h3 .src{font-weight:400}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{padding:20px}
+.card h3{font-size:14px;margin:0 0 14px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card h3 small{font-size:11px;font-weight:600;color:var(--muted)}
+.metric-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.metric-row .num{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.bar-wrap{margin-top:14px}
+.bar-bg{height:8px;border-radius:999px;background:var(--track);overflow:hidden}
+.bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--primary-2))}
+.bar.ai{background:var(--ai)} .bar.warn{background:var(--amber)} .bar.bad{background:var(--red)}
+
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-size:10px;fill:var(--muted);font-family:inherit}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 
 .tablewrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:middle}
-th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+th,td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:middle}
+th{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 td.n,th.n{text-align:right}
+td strong{font-size:12px}
 tr:last-child td{border-bottom:0}
-.share{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-.share i{display:block;height:6px;border-radius:3px;background:var(--bar);min-width:2px}
-.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:600;white-space:nowrap}
-.pill.good{background:var(--good-soft);color:var(--good)}
-.pill.warn{background:var(--dawn-soft);color:var(--dawn)}
-.pill.bad{background:var(--bad-soft);color:var(--bad)}
-.pill.info{background:var(--night-soft);color:var(--night)}
-.empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px;background:var(--sunken)}
+.path{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:11.5px}
+.pill{display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800;white-space:nowrap}
+.pill.blue{background:var(--primary-soft);color:var(--primary)} .pill.green{background:var(--green-soft);color:var(--green)}
+.pill.amber{background:var(--amber-soft);color:var(--amber)} .pill.red{background:var(--red-soft);color:var(--red)}
+.pill.ai{background:var(--ai-soft);color:var(--ai)} .pill.grey{background:var(--track);color:var(--muted)}
+.empty{padding:16px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px;background:var(--sunken)}
+.gsc{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--amber-soft);color:var(--amber);font-size:12px;font-weight:600}
 
-.chart svg{width:100%;height:auto;display:block}
-.chart text{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
-.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.funnel{display:grid;gap:10px;margin-top:8px}
+.funnel-step{padding:14px 16px;border-radius:14px;background:var(--sunken);border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.funnel-step strong{font-size:13px}
+.funnel-step small{display:block;color:var(--muted);margin-top:2px}
+.funnel-step .right{text-align:right}
+.funnel-step .right b{display:block;font-size:18px}
+.funnel-step .right span{font-size:11px;color:var(--muted)}
 
-.funnel{display:grid;gap:8px}
-.fstep{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--sunken);position:relative;overflow:hidden}
-.fstep .fill{position:absolute;inset:0 auto 0 0;background:var(--night-soft);z-index:0}
-.fstep > *:not(.fill){position:relative;z-index:1}
-.fstep strong{font-size:13px}
-.fstep small{display:block;color:var(--muted);font-size:12px}
-.fstep .right{text-align:right}
-.fstep .right b{display:block;font-family:var(--f-display);font-size:19px}
-.fstep .right span{font-size:11px;color:var(--muted)}
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.insight{padding:18px;border-radius:16px;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow)}
+.insight h4{margin:0 0 8px;font-size:13px}
+.insight p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
+.footer{margin:26px 0 4px;color:var(--muted);font-size:11px;text-align:center;display:grid;gap:6px}
+.footer p{margin:0}
 
-.mini-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.mm{padding:12px;border-radius:10px;background:var(--sunken)}
-.mm .label{font-size:12px;color:var(--muted)}
-.mm .value{font-family:var(--f-display);font-size:22px;font-weight:700}
-
-.pending{border-style:dashed;background:var(--sunken)}
-.pending ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13px;display:grid;gap:3px}
-.pending p{margin:0;font-size:13px;color:var(--muted)}
-
-.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.insight h4{margin:0 0 6px;font-size:13px;font-family:var(--f-body);font-weight:600}
-.insight p{margin:0;color:var(--muted);font-size:13px}
-.insight.k-good{border-top:3px solid var(--good)}
-.insight.k-bad{border-top:3px solid var(--bad)}
-.insight.k-info{border-top:3px solid var(--night)}
-
-.foot{font-size:11px;color:var(--muted);display:grid;gap:6px;border-top:1px solid var(--line);padding-top:14px}
-.foot p{margin:0;max-width:110ch}
-
-@media (max-width:1100px){ .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} .g3,.insights{grid-template-columns:1fr} .g21{grid-template-columns:1fr} }
-@media (max-width:760px){ .shell{padding-inline:16px} .exec,.g2{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .topbar h1{font-size:25px} }
-@media (prefers-reduced-motion:no-preference){ .fstep .fill,.share i{transition:width .4s ease} }
+@media(max-width:1100px){ .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} .grid-3{grid-template-columns:1fr} }
+@media(max-width:780px){
+  .shell{padding-inline:16px;padding-block:18px}
+  .topbar,.executive{display:grid;grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-2,.insights{grid-template-columns:1fr}
+  .period{min-width:0}
+  h1{font-size:26px}
+}
 </style>
 
 <div class="shell">
-  <header class="topbar">
+  <div class="topbar">
     <div>
-      <div class="eyebrow">Circady Health · circadyhealth.com</div>
-      <h1>Growth Funnel</h1>
-      <p>Store traffic, product interest and sales from Shopify, laid out from first visit to completed order. Search Console and GA4 panels fill in once those sources are connected.</p>
+      <div class="eyebrow">SEO &amp; AEO Performance Dashboard · circadyhealth.com</div>
+      <h1>Organic &amp; AI Search Overview</h1>
+      <p class="sub">How Circady Health is found in Google and Bing and cited by AI answer engines like ChatGPT, Perplexity and Gemini, and how that traffic moves toward an order.</p>
     </div>
-    <div class="controls">
+    <div class="period">
+      <div><strong id="periodLabel">Last 90 days</strong><span id="periodSub">vs. previous 90 days</span></div>
       <div class="seg" role="group" aria-label="Reporting period">
-        <button type="button" id="p30" data-p="30" aria-pressed="true">Last 30 days</button>
-        <button type="button" id="p90" data-p="90" aria-pressed="false">Last 90 days</button>
+        <button type="button" id="p30" data-p="30" aria-pressed="false">30 days</button>
+        <button type="button" id="p90" data-p="90" aria-pressed="true">90 days</button>
       </div>
-      <button type="button" class="btn" id="refresh">Refresh</button>
-      <span class="status" id="status" data-s="snap"><span class="dot"></span><span id="statusText">Snapshot from Oct 5, 2026</span></span>
+      <div class="live" id="live" data-s="snap"><i></i><span id="liveText">Snapshot from Oct 5, 2026</span></div>
     </div>
-  </header>
+  </div>
 
-  <section class="exec">
-    <div class="panel hero">
-      <h2>Summary</h2>
-      <p id="summaryText"></p>
-      <div class="chips" id="chips"></div>
+  <div class="executive">
+    <div class="hero">
+      <h2>Executive Summary</h2>
+      <p id="summary"></p>
+      <div class="status-row" id="chips"></div>
     </div>
-    <div class="panel headline">
-      <div class="label">Orders this period</div>
-      <div class="big num" id="hOrders">–</div>
-      <div class="delta" id="hOrdersDelta"></div>
-      <p class="muted" style="margin:10px 0 0;font-size:13px" id="hSales"></p>
+    <div class="summary-card">
+      <h3>Search &amp; AI-Driven Orders</h3>
+      <div class="big" id="convBig">–</div>
+      <div class="delta" id="convDelta"></div>
+      <div class="mini" style="margin-top:10px;" id="convNote">Orders whose first visit came from organic search or an AI assistant.</div>
     </div>
-  </section>
+  </div>
 
-  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
+  <div class="kpis" id="kpis"></div>
 
-  <!-- 01 Awareness -->
-  <section class="stage" aria-labelledby="s1">
-    <div class="stage-head"><div class="step">01</div><div><h2 id="s1">Awareness</h2><p>Where visitors come from and how many find the store.</p><p class="note" id="n1"></p></div></div>
-    <div class="g21">
-      <div class="panel chart">
-        <h3>Weekly sessions, last 12 weeks <span class="src">Shopify</span></h3>
-        <div id="trend"></div>
-        <div class="legend"><span><i style="background:var(--bar)"></i>Complete week</span><span><i style="background:var(--bar-dim)"></i>Week in progress</span></div>
-      </div>
-      <div class="panel">
-        <h3>Sessions by source <span class="src">Shopify</span></h3>
-        <div class="tablewrap" id="sources"></div>
-      </div>
+  <!-- TOP OF FUNNEL -->
+  <div class="section-head"><div class="section-title"><div class="section-number">01</div><div>
+    <h2>Top of Funnel — Visibility in Search &amp; AI Answers</h2>
+    <p>How often search engines and AI assistants send people to Circady.</p><p class="note" id="n1"></p>
+  </div></div></div>
+  <div class="grid-3">
+    <div class="card"><h3>Organic Search Sessions <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c1a">–</div><div class="mini" id="c1aSub"></div></div><div class="delta" id="c1aD"></div></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar" id="c1aBar" style="width:0"></div></div></div></div>
+    <div class="card"><h3>AI Answer-Engine Referrals <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c1b">–</div><div class="mini" id="c1bSub"></div></div><div class="delta" id="c1bD"></div></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar ai" id="c1bBar" style="width:0"></div></div></div></div>
+    <div class="card"><h3>Pages Open to Crawlers <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c1c">–</div><div class="mini" id="c1cSub"></div></div><span id="c1cPill"></span></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar" id="c1cBar" style="width:0"></div></div></div></div>
+  </div>
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card chart"><h3>Organic &amp; AI Visibility Trend <small>Weekly sessions · last 12 weeks</small></h3>
+      <div id="trend"></div>
+      <div class="legend"><span><i style="background:var(--primary)"></i>Organic search</span><span><i style="background:var(--ai)"></i>AI assistants</span><span id="partialLegend">Lighter bar = week in progress</span></div>
     </div>
-    <div class="g2">
-      <div class="panel pending">
-        <h3>Organic search visibility <span class="pill warn">Search Console not connected</span></h3>
-        <p>Connect Google Search Console to fill this panel with:</p>
-        <ul><li>Impressions and clicks</li><li>Click-through rate and average position</li><li>Top queries, such as hormonal balance, blood sugar and gut health terms</li><li>Branded vs. non-branded click share</li></ul>
-      </div>
-      <div class="panel">
-        <h3>Sessions by country <span class="src">Shopify</span></h3>
-        <div class="tablewrap" id="countries"></div>
-      </div>
+    <div class="card"><h3>Discovery Sources <small>Shopify referrers</small></h3>
+      <div class="tablewrap" id="sources"></div>
+      <div class="gsc">Search Console not connected: queries, impressions, CTR and average position appear here once it is.</div>
     </div>
-  </section>
+  </div>
 
-  <!-- 02 Consideration -->
-  <section class="stage" aria-labelledby="s2">
-    <div class="stage-head"><div class="step">02</div><div><h2 id="s2">Consideration</h2><p>Which pages visitors land on and whether they reach the product range.</p><p class="note" id="n2"></p></div></div>
-    <div class="g3">
-      <div class="panel" style="grid-column:span 2;min-width:0">
-        <h3>Landing pages <span class="src">Shopify</span></h3>
-        <div class="tablewrap" id="landing"></div>
-      </div>
-      <div class="panel">
-        <h3>Device split <span class="src">Shopify</span></h3>
-        <div class="tablewrap" id="devices"></div>
-      </div>
-    </div>
-    <div class="panel pending">
-      <h3>On-site engagement <span class="pill warn">GA4 not connected</span></h3>
-      <p>Connect GA4 to add engagement rate, engaged sessions, average engagement time, product-page views per session, and the ingredient and research pages people read before buying.</p>
-    </div>
-  </section>
+  <!-- MID FUNNEL -->
+  <div class="section-head"><div class="section-title"><div class="section-number">02</div><div>
+    <h2>Middle of Funnel — Engagement &amp; Consideration</h2>
+    <p>Where search and AI visitors land, and whether they reach products and evidence content.</p><p class="note" id="n2"></p>
+  </div></div></div>
+  <div class="grid-3">
+    <div class="card"><h3>Organic Landing Pages <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c2a">–</div><div class="mini" id="c2aSub"></div></div></div></div>
+    <div class="card"><h3>Product-Page Entries <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c2b">–</div><div class="mini" id="c2bSub"></div></div><div class="delta flat" id="c2bD"></div></div></div>
+    <div class="card"><h3>Content &amp; Evidence Entries <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c2c">–</div><div class="mini" id="c2cSub"></div></div><span id="c2cPill"></span></div></div>
+  </div>
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card"><h3>Top Organic &amp; AI Landing Pages <small>Shopify</small></h3><div class="tablewrap" id="landing"></div></div>
+    <div class="card"><h3>Content Journey Signals <small>Search + AI entries</small></h3><div class="funnel" id="journey"></div>
+      <div class="gsc">GA4 not connected: engagement rate, scroll depth and article-to-product clicks appear here once it is.</div></div>
+  </div>
 
-  <!-- 03 Conversion -->
-  <section class="stage" aria-labelledby="s3">
-    <div class="stage-head"><div class="step">03</div><div><h2 id="s3">Conversion</h2><p>How sessions turn into carts, checkouts and orders.</p><p class="note" id="n3"></p></div></div>
-    <div class="g2">
-      <div class="panel">
-        <h3>Purchase funnel <span class="src">Shopify</span></h3>
-        <div class="funnel" id="funnel"></div>
-      </div>
-      <div class="panel">
-        <h3>Sales <span class="src">Shopify</span></h3>
-        <div class="mini-metrics" id="sales"></div>
-        <h3 style="margin-top:18px">Sales by product</h3>
-        <div class="tablewrap" id="productSales"></div>
-      </div>
-    </div>
-  </section>
+  <!-- BOTTOM FUNNEL -->
+  <div class="section-head"><div class="section-title"><div class="section-number">03</div><div>
+    <h2>Bottom of Funnel — Orders &amp; Revenue Impact</h2>
+    <p>How organic and AI discovery turns into carts and orders.</p><p class="note" id="n3"></p>
+  </div></div></div>
+  <div class="grid-3">
+    <div class="card"><h3>Search &amp; AI Orders <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c3a">–</div><div class="mini">Orders attributed to organic or AI referrers</div></div><div class="delta" id="c3aD"></div></div></div>
+    <div class="card"><h3>Organic Conversion Rate <small>Shopify</small></h3>
+      <div class="metric-row"><div><div class="num" id="c3b">–</div><div class="mini">Orders ÷ organic + AI sessions</div></div></div></div>
+    <div class="card"><h3>Organic Revenue <small>Shopify · USD</small></h3>
+      <div class="metric-row"><div><div class="num" id="c3c">–</div><div class="mini">Net sales from organic and AI referrers</div></div><div class="delta" id="c3cD"></div></div></div>
+  </div>
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card"><h3>Conversion Funnel <small>Organic + AI</small></h3><div class="funnel" id="funnel"></div></div>
+    <div class="card"><h3>Top Converting Organic Pages <small>Shopify</small></h3><div class="tablewrap" id="convPages"></div></div>
+  </div>
 
-  <!-- 04 Store health -->
-  <section class="stage" aria-labelledby="s4">
-    <div class="stage-head"><div class="step">04</div><div><h2 id="s4">Store health</h2><p>Catalog, stock and setup checks that affect every stage above.</p><p class="note" id="n4"></p></div></div>
-    <div class="g21">
-      <div class="panel">
-        <h3>Catalog and stock <span class="src">Shopify</span></h3>
-        <div class="tablewrap" id="catalog"></div>
-      </div>
-      <div class="panel">
-        <h3>Setup checks</h3>
-        <div class="tablewrap" id="checks"></div>
-      </div>
-    </div>
-    <div class="insights" id="insights"></div>
-  </section>
+  <!-- HEALTH -->
+  <div class="section-head"><div class="section-title"><div class="section-number">04</div><div>
+    <h2>SEO &amp; AEO Health &amp; Execution</h2>
+    <p>Technical, content and answer-engine signals that support every stage above.</p><p class="note" id="n4"></p>
+  </div></div></div>
+  <div class="grid-3">
+    <div class="card"><h3>Metadata Coverage</h3>
+      <div class="metric-row"><div><div class="num" id="c4a">–</div><div class="mini">Products with SEO title + meta description</div></div><span id="c4aPill"></span></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar" id="c4aBar" style="width:0"></div></div></div></div>
+    <div class="card"><h3>Image Alt Text</h3>
+      <div class="metric-row"><div><div class="num" id="c4b">–</div><div class="mini" id="c4bSub"></div></div><span id="c4bPill"></span></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar" id="c4bBar" style="width:0"></div></div></div></div>
+    <div class="card"><h3>AEO Readiness</h3>
+      <div class="metric-row"><div><div class="num" id="c4c">–</div><div class="mini">Answer-engine checks passing</div></div><span id="c4cPill"></span></div>
+      <div class="bar-wrap"><div class="bar-bg"><div class="bar" id="c4cBar" style="width:0"></div></div></div></div>
+  </div>
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card"><h3>SEO &amp; AEO Checklist</h3><div class="tablewrap" id="checks"></div></div>
+    <div class="card"><h3>Content Coverage vs. Product Range <small>Published articles</small></h3><div class="tablewrap" id="topics"></div></div>
+  </div>
 
-  <footer class="foot">
-    <p>Sources: Shopify Analytics (ShopifyQL) and the Shopify product catalog, read through your Shopify connector. Amounts are in USD, the store's currency. Each period is compared with the period of equal length before it.</p>
+  <div class="insights" id="insights"></div>
+
+  <div class="footer">
+    <p>Live data from Shopify Analytics and the Shopify Admin API through your Shopify connector. Organic search = Shopify referrer source “search”. AI assistants = ChatGPT, Perplexity, Gemini, Copilot, Claude and similar referrers. Amounts in USD, the store currency. Add Google Search Console and GA4 connectors to fill the query and engagement panels.</p>
     <p>*These statements have not been evaluated by the Food and Drug Administration. Circady Health products are not intended to diagnose, treat, cure, or prevent any disease.</p>
-  </footer>
+  </div>
 </div>
 
 <script>
 (() => {
 const SERVER = "Shopify";
-const CURRENCY = "USD";
-const LOW_STOCK = 10;
+const AI_RE = /chatgpt|openai|perplexity|gemini|bard|copilot|claude|anthropic|you\.com|phind|meta\.ai|grok|deepseek|mistral/i;
+const ENGINES = [
+  {name:"google",label:"Google",type:"search"},{name:"bing",label:"Bing",type:"search"},{name:"duckduckgo",label:"DuckDuckGo",type:"search"},
+  {name:"chatgpt",label:"ChatGPT",type:"ai"},{name:"perplexity",label:"Perplexity",type:"ai"},{name:"gemini",label:"Gemini",type:"ai"},
+  {name:"copilot",label:"Copilot",type:"ai"},{name:"claude",label:"Claude",type:"ai"}
+];
+const EVIDENCE = ["science-research","clinical-trials","lab-tests","medical-review-board","ingredients-sourcing"];
+const HUBS = ["hormonal-health","blood-sugar-support","digestive-health","metabolic-health"];
+const TOPICS = [
+  {key:"sleep",label:"Sleep & circadian rhythm",re:/sleep|insomnia|circadian|jet lag|shift work|magnesium|body clock|3am|light therapy|dinner/i,product:null},
+  {key:"glucose",label:"Blood sugar & metabolic",re:/insulin|blood sugar|glucose|diabetes|mediterranean|metabolic/i,product:"Sololin, Muzanna"},
+  {key:"gut",label:"Digestive comfort",re:/ibs|bloat|digest|fiber|peppermint|gut/i,product:"Zavina"},
+  {key:"hormone",label:"Hormonal balance",re:/pcos|pmos|hormon|oestrogen|estrogen|cycle|menopause/i,product:"Saracryn"}
+];
 
-// Snapshot read from Shopify on Oct 5, 2026 (last 30 days). Shown until live data loads.
-const SNAPSHOT = {
-  funnel:{columns:["sessions","online_store_visitors","sessions_with_cart_additions","sessions_that_reached_checkout","sessions_that_completed_checkout","conversion_rate","comparison_sessions__previous_period","comparison_online_store_visitors__previous_period","comparison_sessions_with_cart_additions__previous_period","comparison_sessions_that_reached_checkout__previous_period","comparison_sessions_that_completed_checkout__previous_period","comparison_conversion_rate__previous_period"],rows:[["156","142","0","0","0","0.0","557","551","0","0","0","0.0"]]},
-  sales:{columns:["orders","net_sales","average_order_value","new_customers","returning_customers","comparison_orders__previous_period","comparison_net_sales__previous_period","comparison_average_order_value__previous_period","comparison_new_customers__previous_period","comparison_returning_customers__previous_period"],rows:[["0","0","","0","0","0","0","","0","0"]]},
-  sources:{columns:["referrer_source","referrer_name","sessions"],rows:[["direct","","146"],["search","google","8"],["social","facebook","2"]]},
-  landing:{columns:["landing_page_path","sessions"],rows:[["/password","105"],["/","51"]]},
-  countries:{columns:["session_country","sessions"],rows:[["United States","123"],["Israel","12"],["Colombia","3"],["Argentina","3"],["Germany","2"],["Canada","2"]]},
-  devices:{columns:["session_device_type","sessions"],rows:[["desktop","139"],["mobile","17"]]},
-  products:{columns:[],rows:[]},
-  trend:{columns:["week","sessions"],rows:[["2026-07-13","49"],["2026-07-20","228"],["2026-07-27","319"],["2026-08-03","176"],["2026-08-10","314"],["2026-08-17","31"],["2026-08-24","50"],["2026-08-31","32"],["2026-09-07","77"],["2026-09-14","25"],["2026-09-21","9"],["2026-09-28","29"],["2026-10-05","3"]]},
-  catalog:[
-    {title:"Saracryn",handle:"saracryn",status:"ACTIVE",tags:["hormonal balance","female health"],price:105,inv:2,sku:"SARACRYN-001"},
-    {title:"Sololin",handle:"sololin",status:"ACTIVE",tags:["blood sugar support","metabolic health"],price:159,inv:3,sku:"SOLOLIN-001"},
-    {title:"Zavina",handle:"zavina",status:"ACTIVE",tags:["gut health","digestive support"],price:99,inv:5,sku:"AVRACALM-001"},
-    {title:"Muzanna",handle:"muzanna",status:"ACTIVE",tags:["metabolic health"],price:139,inv:2,sku:""}
-  ]
+// Snapshot read from Shopify on Oct 5, 2026 (last 90 days). Shown until live data loads.
+const SNAP = {
+  ref:{columns:["referrer_source","referrer_name","sessions","sessions_with_cart_additions","sessions_that_completed_checkout","comparison_sessions__previous_period","comparison_sessions_with_cart_additions__previous_period","comparison_sessions_that_completed_checkout__previous_period"],rows:[["direct","","1303","4","0","909","8","0"],["search","google","41","0","0","46","4","0"],["social","facebook","9","0","0","3","0","0"],["unknown","force","2","0","0","2","0","0"],["unknown","chatgpt","2","0","0","1","0","0"],["unknown","office","0","0","0","1","0","0"],["unknown","njz16m-hx","0","0","0","1","0","0"],["social","slack","0","0","0","1","0","0"],["unknown","upwork","0","0","0","13","1","0"],["unknown","shopify","0","0","0","1","0","0"],["search","bing","0","0","0","9","0","0"],["unknown","asana","0","0","0","2","0","0"]]},
+  land:{columns:["referrer_source","referrer_name","landing_page_path","sessions","sessions_with_cart_additions","sessions_that_completed_checkout"],rows:[["search","google","/","22","0","0"],["search","google","/password","10","0","0"],["search","google","/products/sololin","4","0","0"],["social","facebook","/password","4","0","0"],["search","google","/pages/about-us","2","0","0"],["unknown","force","/","2","0","0"],["unknown","chatgpt","/password","2","0","0"],["social","facebook","/products/muzzana","2","0","0"],["search","google","/pages/privacy-policy","1","0","0"],["search","google","/products/saracryn","1","0","0"],["search","google","/products/avracalm","1","0","0"],["social","facebook","/products/saracryn","1","0","0"],["social","facebook","/products/digestive-support","1","0","0"],["social","facebook","/collections/bestsellers/products/digestive-support","1","0","0"]]},
+  trend:{columns:["week","referrer_source","referrer_name","sessions"],rows:[["2026-07-13","search","google","11"],["2026-07-13","unknown","force","1"],["2026-07-20","social","facebook","2"],["2026-07-20","search","google","2"],["2026-07-27","search","google","10"],["2026-07-27","social","facebook","3"],["2026-08-03","unknown","chatgpt","1"],["2026-08-10","unknown","chatgpt","1"],["2026-08-10","social","facebook","1"],["2026-08-17","search","google","2"],["2026-08-24","search","google","2"],["2026-08-31","social","facebook","1"],["2026-09-07","social","facebook","1"],["2026-09-07","search","google","5"],["2026-09-14","search","google","1"],["2026-09-21","search","google","1"],["2026-09-21","social","facebook","1"],["2026-09-28","search","google","1"],["2026-10-05","","","0"]]},
+  sales:{columns:[],rows:[]},
+  audit:{
+    products:[
+      {title:"Saracryn",handle:"saracryn",seo:true,alts:["SARACRYN - No Background","","","SARACRYN - Pills Scattered","SARACRYN - With Background","SARACRYN - Creative"]},
+      {title:"Sololin",handle:"sololin",seo:true,alts:["SOLOLIN - Pills Scattered","SOLOLIN - Creative","","","SOLOLIN - No Background","SOLOLIN - With Background"]},
+      {title:"Zavina",handle:"zavina",seo:true,alts:["ISATRACT - No Background","ISATRACT - Pills Scattered","","","ISATRACT - Creative","ISATRACT - With Background"]},
+      {title:"Muzanna",handle:"muzanna",seo:true,alts:["",""]}
+    ],
+    pages:[["contact",1,1],["data-sharing-opt-out",1,0],["faq",1,1],["ingredients-sourcing",1,0],["science-research",1,0],["quiz-symptom-finder",0,1],["glossary-definitions",0,1],["return-and-refund-policy",1,0],["privacy-policy",1,0],["terms-of-service",1,0],["shipping-policy",1,0],["about-us",1,1],["pricing-md",1,0],["find-your-routine",1,0],["clinical-trials",1,0],["blood-sugar-support",1,0],["metabolic-health",1,0],["hormonal-health",1,0],["digestive-health",1,0],["lab-tests",1,0],["medical-review-board",1,0],["medicine-3-0",1,1],["science",1,1],["talk-to-our-doctors",1,1]].map(([handle,pub,empty])=>({handle,pub:!!pub,empty:!!empty})),
+    articles:[["How to Reset Your Circadian Rhythm: The Complete Guide","guides","2026-05-30"],["How to Fix Your Sleep Schedule Fast: A Step-by-Step Reset","guides","2026-05-30"],["Waking Up at 3AM Every Night? What Your Body Clock Is Telling You","conditions","2026-08-05"],["Shift Work Sleep Disorder: How to Build a Sleep Schedule That Works","conditions","2026-05-30"],["How Many Milligrams of Magnesium for Sleep? A Dosage Guide","guides","2026-05-30"],["Circadian Fasting & Meal Timing: How When You Eat Syncs Your Body Clock","science","2026-05-30"],["Jet Lag Recovery: Reset Your Body Clock Fast After Travel","conditions","2026-05-30"],["What Is Circadian Rhythm? Your Body Clock Explained","science","2026-05-30"],["Best Magnesium for Sleep: Forms, Doses & What to Look For (2026)","guides","2026-05-30"],["Best Time to Eat Dinner for Your Body Clock","guides","2026-05-30"],["Insulin Resistance Symptoms in Females: 7 Key Signs","conditions","2026-05-30"],["PMOS and Insulin Resistance (Formerly PCOS)","conditions","2026-05-30"],["Diet Changes for IBS: What the Research Supports","guides","2026-05-30"],["Type 2 Diabetes and Insulin Resistance Explained","conditions","2026-05-30"],["High-Fiber Diet for IBS: What to Eat","guides","2026-05-30"],["The Mediterranean Diet for Insulin Resistance","guides","2026-05-30"],["Peppermint Oil Capsules for Bloating: Does It Work?","guides","2026-05-30"],["Light Therapy and Your Circadian Rhythm","science","2026-05-30"],["Sleep Hygiene for Insomnia: Habits That Actually Help","guides","2026-06-01"],["Insomnia During Pregnancy: Causes & Safe Relief","conditions","2026-06-01"],["What Is Insomnia? Definition, Types, and Causes","conditions","2026-06-01"],["Sleep Hygiene Worksheet: A Printable Checklist for Better Sleep","guides","2026-06-01"],["Herbal Tea for Insomnia: What Works and What Doesn't","guides","2026-06-01"],["Insomnia ICD-10 Codes Explained: G47.0, F51.0, and More","conditions","2026-06-01"],["Cognitive Behavioral Therapy for Insomnia: How It Works","conditions","2026-06-01"],["Sleep Hygiene for Older Adults: Evidence-Based Tips","guides","2026-06-01"]].map(([title,blog,at])=>({title,blog,pub:true,at})),
+    redirects:["/collections/ibs","/collections/pcos","/collections/insulin-support","/pricing.md","/collections/daily-wellness","/pages/insulin-support","/pages/sleep-assessment","/pages/ibs","/pages/pcos","/pages/quiz-symptom-finder","/products/avracalm","/products/muzzana","/blogs/science/how-to-reset-your-circadian-rhythm","/blogs/science/waking-up-at-3am-every-night","/blogs/science/jet-lag-recovery","/blogs/science/best-magnesium-for-sleep","/blogs/science/best-time-to-eat-dinner","/blogs/conditions/diet-changes-for-ibs","/blogs/science/circadian-rhythm-definition","/blogs/conditions/what-is-cbt-for-insomnia","/blogs/conditions/insulin-resistance-symptoms-in-women","/collections/female-hormonal-balance"]
+  }
 };
 
-const RANGE = {30:"SINCE -30d UNTIL today", 90:"SINCE -90d UNTIL today"};
+const RANGE = {30:"SINCE -30d UNTIL today",90:"SINCE -90d UNTIL today"};
+const AUDIT_Q = `query SeoAudit { products(first: 50) { nodes { title handle status seo { title description } media(first: 20) { nodes { alt } } } } pages(first: 100) { nodes { handle isPublished bodySummary } } articles(first: 100) { nodes { title isPublished publishedAt blog { handle } } } urlRedirects(first: 100) { nodes { path } } }`;
 const queries = p => ({
-  funnel:`FROM sessions SHOW sessions, online_store_visitors, sessions_with_cart_additions, sessions_that_reached_checkout, sessions_that_completed_checkout, conversion_rate ${RANGE[p]} COMPARE TO previous_period`,
-  sales:`FROM sales SHOW orders, net_sales, average_order_value, new_customers, returning_customers ${RANGE[p]} COMPARE TO previous_period`,
-  sources:`FROM sessions SHOW sessions GROUP BY referrer_source, referrer_name ${RANGE[p]} ORDER BY sessions DESC LIMIT 8`,
-  landing:`FROM sessions SHOW sessions GROUP BY landing_page_path ${RANGE[p]} ORDER BY sessions DESC LIMIT 8`,
-  countries:`FROM sessions SHOW sessions GROUP BY session_country ${RANGE[p]} ORDER BY sessions DESC LIMIT 6`,
-  devices:`FROM sessions SHOW sessions GROUP BY session_device_type ${RANGE[p]} ORDER BY sessions DESC`,
-  products:`FROM sales SHOW orders, net_sales GROUP BY product_title ${RANGE[p]} ORDER BY net_sales DESC LIMIT 8`,
-  trend:`FROM sessions SHOW sessions TIMESERIES week SINCE -84d UNTIL today`
+  ref:`FROM sessions SHOW sessions, sessions_with_cart_additions, sessions_that_completed_checkout GROUP BY referrer_source, referrer_name ${RANGE[p]} COMPARE TO previous_period ORDER BY sessions DESC LIMIT 50`,
+  land:`FROM sessions SHOW sessions, sessions_with_cart_additions, sessions_that_completed_checkout GROUP BY referrer_source, referrer_name, landing_page_path WHERE referrer_source != 'direct' ${RANGE[p]} ORDER BY sessions DESC LIMIT 50`,
+  sales:`FROM sales SHOW orders, net_sales GROUP BY order_referrer_source, order_referrer_name ${RANGE[p]} COMPARE TO previous_period`,
+  trend:`FROM sessions SHOW sessions GROUP BY referrer_source, referrer_name TIMESERIES week WHERE referrer_source != 'direct' SINCE -84d UNTIL today`
 });
-const SECTION_OF = {funnel:"n3",sales:"n3",products:"n3",sources:"n1",countries:"n1",trend:"n1",landing:"n2",devices:"n2",catalog:"n4"};
+const NOTE_OF = {ref:"n1",trend:"n1",land:"n2",sales:"n3",audit:"n4"};
 
-let period = "30";
-let data = structuredClone(SNAPSHOT);
-let errors = {};
-let lastUpdated = null;
-let mcp = null;
-let unsubs = [];
-
+let period = "90", data = structuredClone(SNAP), errors = {}, lastAt = null, mcp = null, unsubs = [];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const num = v => (v === "" || v == null || isNaN(+v)) ? null : +v;
-const fmtInt = v => v == null ? "–" : Math.round(v).toLocaleString("en-US");
-const fmtMoney = v => v == null ? "–" : new Intl.NumberFormat("en-US",{style:"currency",currency:CURRENCY,maximumFractionDigits:v>=1000?0:2}).format(v);
-const fmtPct = (v,d=1) => v == null ? "–" : (v*100).toFixed(d)+"%";
-const objs = t => (t && t.rows ? t.rows.map(r => Object.fromEntries((t.columns||[]).map((c,i)=>[typeof c==="string"?c:c.name, r[i]]))) : []);
-const first = t => objs(t)[0] || {};
+const N = v => (v === "" || v == null || isNaN(+v)) ? 0 : +v;
+const int = v => Math.round(v).toLocaleString("en-US");
+const pct = (v,d=1) => v == null || !isFinite(v) ? "–" : (v*100).toFixed(d)+"%";
+const money = v => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:v>=1000?0:2}).format(v);
+const ratio = (a,b) => b ? a/b : null;
+const objs = t => t && t.rows ? t.rows.map(r => Object.fromEntries((t.columns||[]).map((c,i)=>[typeof c==="string"?c:c.name, r[i]]))) : [];
+const kind = r => r.referrer_source === "search" ? "search" : AI_RE.test(r.referrer_name||"") ? "ai" : "other";
 function delta(cur, prev){
-  if (cur == null || prev == null) return {cls:"flat", txt:"no comparison"};
-  if (prev === 0 && cur === 0) return {cls:"flat", txt:"no change"};
-  if (prev === 0) return {cls:"up", txt:"▲ new"};
-  const d = (cur-prev)/prev;
-  return {cls: d>0?"up":d<0?"down":"flat", txt:(d>0?"▲ ":d<0?"▼ ":"")+Math.abs(d*100).toFixed(1)+"% vs prior"};
+  if (!prev && !cur) return {cls:"flat",txt:"No change"};
+  if (!prev) return {cls:"up",txt:"▲ New"};
+  const d=(cur-prev)/prev;
+  return {cls:d>0?"up":d<0?"down":"flat",txt:`${d>0?"▲":d<0?"▼":""} ${Math.abs(d*100).toFixed(1)}% vs. previous period`};
 }
-const ratio = (a,b) => (a==null||!b) ? null : a/b;
-
-function shareTable(rows, labelFn, total, labelHead){
-  if (!rows.length) return `<div class="empty">No sessions recorded in this period.</div>`;
-  const max = Math.max(...rows.map(r=>num(r.sessions)||0), 1);
-  return `<table><thead><tr><th>${labelHead}</th><th class="n">Sessions</th><th class="n">Share</th></tr></thead><tbody>${
-    rows.map(r=>{const s=num(r.sessions)||0;return `<tr><td>${labelFn(r)}</td><td class="n">${fmtInt(s)}</td><td class="n"><div class="share"><i style="width:${Math.round(56*s/max)}px"></i>${fmtPct(ratio(s,total),0)}</div></td></tr>`}).join("")
-  }</tbody></table>`;
-}
+const setD = (id,d) => { const el=$(id); el.className="delta "+d.cls; el.textContent=d.txt; };
+const bar = (id,v,cls) => { const el=$(id); el.style.width=Math.max(0,Math.min(100,(v||0)*100))+"%"; if(cls) el.className="bar "+cls; };
+const pill = (cls,t) => `<span class="pill ${cls}">${esc(t)}</span>`;
+const handleOf = p => { const m=(p||"").match(/\/products\/([^/?#]+)/); return m?m[1]:null; };
 
 function trendSVG(t){
-  const rows = objs(t).map(r=>({w:r.week, s:num(r.sessions)||0}));
-  if (!rows.length) return `<div class="empty">No sessions recorded in the last 12 weeks.</div>`;
-  const W=640,H=220,L=36,R=8,T=12,B=28, iw=W-L-R, ih=H-T-B;
-  const maxV = Math.max(...rows.map(r=>r.s),1);
-  const step = [10,25,50,100,200,250,500,1000,2000,5000,10000].find(s=>maxV/s<=4) || Math.ceil(maxV/4);
-  const top = Math.ceil(maxV/step)*step;
-  const y = v => T + ih - (v/top)*ih;
-  const bw = iw/rows.length, gap = Math.min(10, bw*.3);
-  const today = new Date(); const weekMs = 7*864e5;
-  let g = "";
-  for (let v=0; v<=top; v+=step){ g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${v}</text>`; }
-  const every = rows.length > 8 ? 2 : 1;
+  const weeks = {};
+  objs(t).forEach(r=>{ const w=r.week; weeks[w]=weeks[w]||{s:0,a:0}; const k=kind(r); if(k==="search") weeks[w].s+=N(r.sessions); else if(k==="ai") weeks[w].a+=N(r.sessions); });
+  const rows = Object.keys(weeks).sort().map(w=>({w,...weeks[w]}));
+  if (!rows.length) return `<div class="empty">No organic or AI sessions in the last 12 weeks.</div>`;
+  const W=640,H=200,L=30,R=6,T=10,B=26,iw=W-L-R,ih=H-T-B;
+  const maxV=Math.max(...rows.map(r=>r.s+r.a),1);
+  const step=[1,2,5,10,20,25,50,100,200,500,1000].find(s=>maxV/s<=5)||Math.ceil(maxV/5);
+  const top=Math.ceil(maxV/step)*step, y=v=>T+ih-(v/top)*ih, bw=iw/rows.length, gap=Math.min(12,bw*.35);
+  const now=new Date(); let g="";
+  for(let v=0;v<=top;v+=step) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${v}</text>`;
   rows.forEach((r,i)=>{
-    const d = new Date(r.w+"T00:00:00");
-    const partial = (today - d) < weekMs;
-    const x = L + i*bw + gap/2, h = Math.max(ih - (y(r.s)-T), r.s?1:0);
-    g += `<rect x="${x}" y="${y(r.s)}" width="${bw-gap}" height="${h}" rx="3" fill="${partial?'var(--bar-dim)':'var(--bar)'}"><title>Week of ${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}: ${r.s} sessions${partial?" (in progress)":""}</title></rect>`;
-    if (i%every===0 || i===rows.length-1) g += `<text x="${x+(bw-gap)/2}" y="${H-10}" text-anchor="middle">${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</text>`;
+    const d=new Date(r.w+"T00:00:00"), partial=(now-d)<7*864e5, x=L+i*bw+gap/2, w=bw-gap, op=partial?.45:1;
+    const lab=d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    if(r.s) g+=`<rect x="${x}" y="${y(r.s)}" width="${w}" height="${y(0)-y(r.s)}" rx="3" fill="var(--primary)" opacity="${op}"><title>Week of ${lab}: ${r.s} organic</title></rect>`;
+    if(r.a) g+=`<rect x="${x}" y="${y(r.s+r.a)}" width="${w}" height="${y(r.s)-y(r.s+r.a)}" rx="3" fill="var(--ai)" opacity="${op}"><title>Week of ${lab}: ${r.a} AI</title></rect>`;
+    if(i%2===0||i===rows.length-1) g+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle">${lab}</text>`;
   });
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weekly sessions bar chart">${g}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weekly organic and AI sessions">${g}</svg>`;
 }
 
 function render(){
-  const f = first(data.funnel), s = first(data.sales);
-  const sess = num(f.sessions), prevSess = num(f.comparison_sessions__previous_period);
-  const vis = num(f.online_store_visitors), prevVis = num(f.comparison_online_store_visitors__previous_period);
-  const cart = num(f.sessions_with_cart_additions), prevCart = num(f.comparison_sessions_with_cart_additions__previous_period);
-  const chk = num(f.sessions_that_reached_checkout), done = num(f.sessions_that_completed_checkout);
-  const cvr = num(f.conversion_rate), prevCvr = num(f.comparison_conversion_rate__previous_period);
-  const orders = num(s.orders), prevOrders = num(s.comparison_orders__previous_period);
-  const net = num(s.net_sales), prevNet = num(s.comparison_net_sales__previous_period);
-  const aov = num(s.average_order_value);
-  const srcRows = objs(data.sources);
-  const searchSess = srcRows.filter(r=>r.referrer_source==="search").reduce((a,r)=>a+(num(r.sessions)||0),0);
-  const landRows = objs(data.landing);
-  const pwSess = landRows.filter(r=>r.landing_page_path==="/password").reduce((a,r)=>a+(num(r.sessions)||0),0);
-  const pwShare = ratio(pwSess, sess);
-  const catalog = data.catalog || [];
-  const lowStock = catalog.filter(p=>p.inv!=null && p.inv<=LOW_STOCK);
-  const skuIssues = catalog.filter(p=>!p.sku || !p.sku.toUpperCase().startsWith(p.title.toUpperCase().slice(0,4)));
+  const ref = objs(data.ref), land = objs(data.land), sales = objs(data.sales), A = data.audit || {products:[],pages:[],articles:[],redirects:[]};
+  const sum = (rows,f,k) => rows.filter(f).reduce((a,r)=>a+N(r[k]),0);
+  const isS = r=>kind(r)==="search", isA = r=>kind(r)==="ai", isSA = r=>kind(r)!=="other";
+  const total = sum(ref,()=>true,"sessions"), totalPrev = sum(ref,()=>true,"comparison_sessions__previous_period");
+  const org = sum(ref,isS,"sessions"), orgPrev = sum(ref,isS,"comparison_sessions__previous_period");
+  const ai = sum(ref,isA,"sessions"), aiPrev = sum(ref,isA,"comparison_sessions__previous_period");
+  const saSess = org+ai, saCart = sum(ref,isSA,"sessions_with_cart_additions"), saDone = sum(ref,isSA,"sessions_that_completed_checkout");
+  const srow = r => ({referrer_source:r.order_referrer_source, referrer_name:r.order_referrer_name});
+  const saSales = sales.filter(r=>kind(srow(r))!=="other");
+  const orders = saSales.reduce((a,r)=>a+N(r.orders),0), ordersPrev = saSales.reduce((a,r)=>a+N(r.comparison_orders__previous_period),0);
+  const rev = saSales.reduce((a,r)=>a+N(r.net_sales),0), revPrev = saSales.reduce((a,r)=>a+N(r.comparison_net_sales__previous_period),0);
+  const cvr = ratio(orders, saSess);
 
-  // Headline
-  $("hOrders").textContent = fmtInt(orders);
-  const od = delta(orders, prevOrders); $("hOrdersDelta").className = "delta "+od.cls; $("hOrdersDelta").textContent = od.txt;
-  $("hSales").textContent = orders ? `${fmtMoney(net)} net sales · ${fmtMoney(aov)} average order` : "No orders have been placed in this period.";
+  // landing pages (search + AI only), aggregated by path
+  const byPath = {};
+  land.filter(isSA).forEach(r=>{ const p=r.landing_page_path||"/"; const o=byPath[p]=byPath[p]||{path:p,s:0,cart:0,done:0,src:new Set()}; o.s+=N(r.sessions); o.cart+=N(r.sessions_with_cart_additions); o.done+=N(r.sessions_that_completed_checkout); o.src.add(kind(r)); });
+  const paths = Object.values(byPath).sort((a,b)=>b.s-a.s);
+  const pwEntries = paths.filter(p=>p.path==="/password").reduce((a,p)=>a+p.s,0);
+  const pwAll = land.filter(r=>r.landing_page_path==="/password").reduce((a,r)=>a+N(r.sessions),0);
+  const passwordOn = pwAll > 0;
+  const prodEntries = paths.filter(p=>handleOf(p.path)).reduce((a,p)=>a+p.s,0);
+  const blogEntries = paths.filter(p=>p.path.startsWith("/blogs/")).reduce((a,p)=>a+p.s,0);
+  const evEntries = paths.filter(p=>EVIDENCE.some(h=>p.path==="/pages/"+h)).reduce((a,p)=>a+p.s,0);
+  const hubEntries = paths.filter(p=>HUBS.some(h=>p.path==="/pages/"+h)).reduce((a,p)=>a+p.s,0);
 
-  // Summary
-  const sd = delta(sess, prevSess);
-  let summary;
-  if (pwShare != null && pwShare >= .2) {
-    summary = `${fmtPct(pwShare,0)} of sessions in this period landed on the storefront password page, and ${cart ? fmtInt(cart)+" sessions" : "no sessions"} added a product to the cart. The store is still behind its password, so the funnel stops at the front door. Removing the password is the step that unlocks every stage below. Traffic is ${sd.cls==="down"?"down":sd.cls==="up"?"up":"flat"} versus the prior period (${fmtInt(sess)} vs ${fmtInt(prevSess)} sessions).`;
-  } else if (!orders) {
-    summary = `${fmtInt(sess)} sessions this period and no orders yet. ${cart ? fmtInt(cart)+" sessions added to cart, so the drop-off sits between cart and checkout." : "No sessions added to cart, so product pages are the first place to look."}`;
-  } else {
-    summary = `${fmtInt(orders)} orders from ${fmtInt(sess)} sessions (${fmtPct(cvr/100,2)} conversion) and ${fmtMoney(net)} in net sales this period.`;
-  }
-  $("summaryText").textContent = summary;
+  // audit
+  const prodHandles = new Set(A.products.map(p=>p.handle));
+  const redirects = new Set(A.redirects);
+  const pubPages = A.pages.filter(p=>p.pub), pubArticles = A.articles.filter(a=>a.pub);
+  const indexable = A.products.length + pubPages.length + pubArticles.length;
+  const seoOk = A.products.filter(p=>p.seo).length;
+  const allAlts = A.products.flatMap(p=>p.alts.map(a=>({a,p})));
+  const altOk = allAlts.filter(x=>x.a.trim()).length;
+  const staleAlt = allAlts.filter(x=>x.a.trim() && !x.a.toLowerCase().includes(x.p.title.toLowerCase()));
+  const staleProducts = [...new Set(staleAlt.map(x=>x.p.title))];
+  const emptyPub = pubPages.filter(p=>p.empty).map(p=>p.handle);
+  const pageOk = h => A.pages.some(p=>p.handle===h && p.pub && !p.empty);
+  const brokenLegacy = [...new Set(land.map(r=>handleOf(r.landing_page_path)).filter(h=>h && !prodHandles.has(h) && !redirects.has("/products/"+h)))];
+  const lastPub = pubArticles.map(a=>a.at).sort().pop();
+  const daysSince = lastPub ? Math.floor((Date.now()-new Date(lastPub+"T00:00:00"))/864e5) : null;
+  const topicCounts = TOPICS.map(t=>({...t,n:pubArticles.filter(a=>t.re.test(a.title)).length}));
+  const sleepN = topicCounts.find(t=>t.key==="sleep").n;
+
+  const checks = [
+    ["Storefront open to crawlers", !passwordOn, passwordOn ? `Password page received ${int(pwAll)} referral entries; Google and AI crawlers can't index behind it` : "No password-page entries this period"],
+    ["Machine-readable pricing for AI assistants", pageOk("pricing-md") && redirects.has("/pricing.md"), "/pages/pricing-md, also served at /pricing.md"],
+    ["Expert review page (E-E-A-T)", pageOk("medical-review-board"), "/pages/medical-review-board"],
+    ["Research library with citations", pageOk("science-research"), "/pages/science-research"],
+    ["Published clinical trial", pageOk("clinical-trials"), "/pages/clinical-trials"],
+    ["Batch lab results page", pageOk("lab-tests"), "/pages/lab-tests"],
+    ["FAQ page has answers", pageOk("faq"), pageOk("faq") ? "/pages/faq" : "/pages/faq is published but empty; FAQ content is a primary AI-answer source"],
+    ["About page has content", pageOk("about-us"), pageOk("about-us") ? "/pages/about-us" : "/pages/about-us is empty and already gets organic entries"],
+    ["Legacy product URLs redirect", !brokenLegacy.length, brokenLegacy.length ? brokenLegacy.map(h=>"/products/"+h).join(", ")+" received traffic with no redirect" : `${redirects.size} redirects in place`],
+    ["Alt text matches product names", !staleAlt.length, staleAlt.length ? `${staleAlt.length} images on ${staleProducts.join(", ")} use an old product name` : "All named correctly"]
+  ];
+  const aeo = checks.filter(c=>c[1]).length;
+
+  // Header + summary
+  $("periodLabel").textContent = `Last ${period} days`; $("periodSub").textContent = ` · vs. previous ${period} days`;
+  $("convBig").textContent = int(orders); setD("convDelta", delta(orders, ordersPrev));
+  const od = delta(org, orgPrev);
+  $("summary").textContent = passwordOn
+    ? `Google sent ${int(org)} organic sessions this period (${od.cls==="down"?"down":od.cls==="up"?"up":"flat"} from ${int(orgPrev)}) and AI assistants sent ${int(ai)}, before the store has opened. The storefront password is the main constraint: search engines and AI crawlers can't index the ${int(indexable)} published products, pages and articles behind it, so content isn't ranking or being cited yet. The site is well prepared for launch, with full metadata, an expert board, a published trial and a machine-readable pricing page. The FAQ page and topic coverage are the main gaps.`
+    : `Organic search drove ${int(org)} sessions and AI assistants ${int(ai)} this period, ${pct(ratio(saSess,total),1)} of all traffic, producing ${int(orders)} orders. ${blogEntries ? "Articles are starting to bring in visitors." : "Articles aren't yet bringing in visitors."}`;
   const chips = [];
-  if (pwShare != null && pwShare >= .2) chips.push(["bad","Storefront password is on"]);
-  chips.push(cart ? ["good",`${fmtInt(cart)} cart sessions`] : ["warn","No add-to-cart activity"]);
-  chips.push([searchSess ? "info":"warn", `Search drives ${fmtPct(ratio(searchSess,sess),0)} of sessions`]);
-  if (lowStock.length) chips.push(["warn",`${lowStock.length} of ${catalog.length} products at ${LOW_STOCK} units or fewer`]);
-  $("chips").innerHTML = chips.map(([c,t])=>`<span class="chip ${c}">${esc(t)}</span>`).join("");
+  chips.push(passwordOn ? ["bad","Store not indexable while password is on"] : ["good","Storefront open to crawlers"]);
+  chips.push(org>=orgPrev ? ["good","Organic sessions holding or growing"] : ["warn","Organic sessions below previous period"]);
+  chips.push(ai ? ["neutral",`Cited by AI assistants (${int(ai)} visits)`] : ["warn","No AI-assistant referrals yet"]);
+  chips.push([aeo>=8?"good":"warn",`AEO readiness ${aeo}/${checks.length}`]);
+  $("chips").innerHTML = chips.map(([c,t])=>`<span class="chip ${c}"><span class="dot"></span>${esc(t)}</span>`).join("");
 
   // KPIs
   const k = [
-    ["Sessions", fmtInt(sess), delta(sess,prevSess)],
-    ["Visitors", fmtInt(vis), delta(vis,prevVis)],
-    ["Search sessions", fmtInt(searchSess), {cls:"flat",txt:fmtPct(ratio(searchSess,sess),1)+" of total"}],
-    ["Cart sessions", fmtInt(cart), delta(cart,prevCart)],
-    ["Conversion rate", cvr==null?"–":cvr.toFixed(2)+"%", cvr!=null&&prevCvr!=null?{cls:cvr>prevCvr?"up":cvr<prevCvr?"down":"flat",txt:(cvr-prevCvr).toFixed(2)+" pp vs prior"}:{cls:"flat",txt:""}],
-    ["Net sales", fmtMoney(net), delta(net,prevNet)]
+    {l:"Organic Clicks",v:"—",pend:"Connect GSC"},
+    {l:"Organic Impressions",v:"—",pend:"Connect GSC"},
+    {l:"Organic Sessions",v:int(org),d:delta(org,orgPrev)},
+    {l:"AI Assistant Sessions",v:int(ai),d:delta(ai,aiPrev)},
+    {l:"Search + AI Share",v:pct(ratio(saSess,total),1),d:{cls:"flat",txt:`of ${int(total)} sessions`}},
+    {l:"Organic CVR",v:cvr==null?"–":pct(cvr,2),d:{cls:"flat",txt:`${int(orders)} orders`}}
   ];
-  $("kpis").innerHTML = k.map(([l,v,d])=>`<div class="kpi"><div class="label">${l}</div><div class="value num">${v}</div><div class="foot"><span class="delta ${d.cls}">${esc(d.txt)}</span><span class="src">Shopify</span></div></div>`).join("");
+  $("kpis").innerHTML = k.map(x=>`<div class="kpi${x.pend?" pending":""}"><div class="label">${x.l}</div><div class="value">${x.v}</div><div class="foot">${x.pend?`<span class="pill amber">${x.pend}</span><span>GSC</span>`:`<span class="delta ${x.d.cls}">${esc(x.d.txt.replace(" vs. previous period",""))}</span><span>Shopify</span>`}</div></div>`).join("");
 
-  // Awareness
+  // 01
+  $("c1a").textContent = int(org); $("c1aSub").textContent = `${pct(ratio(org,total),1)} of all sessions`; setD("c1aD", delta(org,orgPrev)); bar("c1aBar", ratio(org,total));
+  $("c1b").textContent = int(ai); $("c1bSub").textContent = ai ? `${pct(ratio(ai,total),1)} of all sessions` : "No AI referrals this period"; setD("c1bD", delta(ai,aiPrev)); bar("c1bBar", ratio(ai,total));
+  $("c1c").textContent = passwordOn ? `0 / ${int(indexable)}` : `${int(indexable)} / ${int(indexable)}`;
+  $("c1cSub").textContent = `${A.products.length} products · ${pubPages.length} pages · ${pubArticles.length} articles`;
+  $("c1cPill").innerHTML = passwordOn ? pill("red","Password on") : pill("green","Open");
+  bar("c1cBar", passwordOn ? 0.02 : 1, passwordOn ? "bad" : "");
   $("trend").innerHTML = trendSVG(data.trend);
-  const srcLabel = r => `${esc(r.referrer_source ? r.referrer_source[0].toUpperCase()+r.referrer_source.slice(1) : "Unknown")}${r.referrer_name?` <span class="muted">· ${esc(r.referrer_name)}</span>`:""}`;
-  $("sources").innerHTML = shareTable(srcRows, srcLabel, sess, "Source");
-  const cRows = objs(data.countries);
-  $("countries").innerHTML = shareTable(cRows, r=>esc(r.session_country||"Unknown"), sess, "Country");
+  const engRows = ENGINES.map(e=>{ const rs=ref.filter(r=>(r.referrer_name||"").toLowerCase().includes(e.name)); return {...e,s:rs.reduce((a,r)=>a+N(r.sessions),0),p:rs.reduce((a,r)=>a+N(r.comparison_sessions__previous_period),0)}; });
+  ref.filter(r=>isSA(r) && !ENGINES.some(e=>(r.referrer_name||"").toLowerCase().includes(e.name))).forEach(r=>engRows.push({label:r.referrer_name||"Other search",type:kind(r),s:N(r.sessions),p:N(r.comparison_sessions__previous_period)}));
+  engRows.sort((a,b)=>b.s-a.s || b.p-a.p);
+  $("sources").innerHTML = `<table><thead><tr><th>Engine</th><th>Type</th><th class="n">Sessions</th><th>Trend</th></tr></thead><tbody>${engRows.map(e=>{
+    const d=delta(e.s,e.p); const tp = !e.s && !e.p ? pill("grey", e.type==="ai"?"Not cited yet":"No traffic") : d.cls==="up"?pill("green",d.txt.split(" vs")[0]):d.cls==="down"?pill("red",d.txt.split(" vs")[0]):pill("amber","Stable");
+    return `<tr><td><strong>${esc(e.label)}</strong></td><td>${e.type==="ai"?pill("ai","AI answer"):pill("blue","Search")}</td><td class="n">${int(e.s)}</td><td>${tp}</td></tr>`;}).join("")}</tbody></table>`;
 
-  // Consideration
-  $("landing").innerHTML = landRows.length ? `<table><thead><tr><th>Landing page</th><th class="n">Sessions</th><th class="n">Share</th><th>Status</th></tr></thead><tbody>${
-    landRows.map(r=>{const v=num(r.sessions)||0;const p=r.landing_page_path||"";
-      const st = p==="/password" ? `<span class="pill bad">Password gate</span>` : p==="/" ? `<span class="pill info">Homepage</span>` : p.startsWith("/products/") ? `<span class="pill good">Product page</span>` : p.startsWith("/collections/") ? `<span class="pill good">Collection</span>` : p.startsWith("/blogs/") ? `<span class="pill info">Content</span>` : `<span class="pill info">Page</span>`;
-      return `<tr><td class="mono">${esc(p)}</td><td class="n">${fmtInt(v)}</td><td class="n">${fmtPct(ratio(v,sess),0)}</td><td>${st}</td></tr>`}).join("")
-  }</tbody></table>${landRows.some(r=>(r.landing_page_path||"").startsWith("/products/"))?"":`<p class="muted" style="font-size:12px;margin:10px 0 0">No sessions landed directly on a product page in this period.</p>`}` : `<div class="empty">No sessions recorded in this period.</div>`;
-  $("devices").innerHTML = shareTable(objs(data.devices), r=>esc((r.session_device_type||"other").replace(/^./,c=>c.toUpperCase())), sess, "Device");
-
-  // Conversion funnel
-  const steps = [
-    ["Sessions","Every visit to the store",sess],
-    ["Added to cart","Sessions with at least one product in the cart",cart],
-    ["Reached checkout","Sessions that opened checkout",chk],
-    ["Completed checkout","Sessions that placed an order",done]
+  // 02
+  $("c2a").textContent = int(paths.length); $("c2aSub").textContent = `Distinct entry URLs from search and AI`;
+  $("c2b").textContent = int(prodEntries); $("c2bSub").textContent = `${pct(ratio(prodEntries,saSess),0)} of search + AI sessions start on a product page`;
+  $("c2c").textContent = int(blogEntries+evEntries+hubEntries); $("c2cSub").textContent = `Across ${pubArticles.length} articles and ${EVIDENCE.length+HUBS.length} topic and evidence pages`;
+  $("c2cPill").innerHTML = (blogEntries+evEntries+hubEntries) ? pill("green","Ranking") : pill("amber","Not ranking yet");
+  const typeOf = p => p==="/password"?pill("red","Password gate"):p==="/"?pill("blue","Homepage"):handleOf(p)?(prodHandles.has(handleOf(p))?pill("green","Product"):redirects.has("/products/"+handleOf(p))?pill("amber","Redirected"):pill("red","Possible 404")):p.startsWith("/blogs/")?pill("blue","Article"):pill("grey","Page");
+  $("landing").innerHTML = paths.length ? `<table><thead><tr><th>Landing Page</th><th>Type</th><th class="n">Sessions</th><th class="n">Cart</th></tr></thead><tbody>${paths.slice(0,8).map(p=>`<tr><td class="path">${esc(p.path)}${p.src.has("ai")?" "+pill("ai","AI"):""}</td><td>${typeOf(p.path)}</td><td class="n">${int(p.s)}</td><td class="n">${int(p.cart)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">No search or AI landings in this period.</div>`;
+  const journey = [
+    ["Articles",`${pubArticles.length} published guides and explainers`,blogEntries],
+    ["Topic hubs","Hormonal, blood sugar, digestive and metabolic pages",hubEntries],
+    ["Evidence pages","Research library, clinical trial, lab tests, medical board",evEntries],
+    ["Product pages",`${A.products.length} active products`,prodEntries]
   ];
-  $("funnel").innerHTML = steps.map(([t,d,v],i)=>{
-    const ofTop = ratio(v,sess), ofPrev = i ? ratio(v, steps[i-1][2]) : 1;
-    return `<div class="fstep"><div class="fill" style="width:${Math.max(0,Math.min(100,(ofTop||0)*100))}%"></div><div><strong>${t}</strong><small>${d}</small></div><div class="right"><b class="num">${fmtInt(v)}</b><span>${i? (ofPrev==null?"– of previous step":fmtPct(ofPrev,1)+" of previous step") : "100%"}</span></div></div>`;
-  }).join("");
-  $("sales").innerHTML = [
-    ["Orders", fmtInt(orders)], ["Net sales", fmtMoney(net)],
-    ["Average order", aov==null?"–":fmtMoney(aov)], ["New / returning customers", `${fmtInt(num(s.new_customers))} / ${fmtInt(num(s.returning_customers))}`]
-  ].map(([l,v])=>`<div class="mm"><div class="label">${l}</div><div class="value num">${v}</div></div>`).join("");
-  const pRows = objs(data.products);
-  $("productSales").innerHTML = pRows.length ? `<table><thead><tr><th>Product</th><th class="n">Orders</th><th class="n">Net sales</th></tr></thead><tbody>${
-    pRows.map(r=>`<tr><td>${esc(r.product_title)}</td><td class="n">${fmtInt(num(r.orders))}</td><td class="n">${fmtMoney(num(r.net_sales))}</td></tr>`).join("")}</tbody></table>`
-    : `<div class="empty">No product sales in this period. Rows appear here after the first order.</div>`;
+  $("journey").innerHTML = journey.map(([t,s,v])=>`<div class="funnel-step"><div><strong>${t}</strong><small>${esc(s)}</small></div><div class="right"><b>${int(v)}</b><span>${pct(ratio(v,saSess),0)} of entries</span></div></div>`).join("");
 
-  // Store health
-  const focus = p => {
-    const t = (p.tags||[]).map(x=>x.toLowerCase());
-    if (t.includes("hormonal balance")) return "Hormonal balance support";
-    if (t.includes("blood sugar support")) return "Blood sugar support";
-    if (t.includes("gut health")||t.includes("digestive support")) return "Digestive comfort support";
-    if (t.includes("metabolic health")) return "Metabolic health support";
-    return "Supplement";
-  };
-  $("catalog").innerHTML = catalog.length ? `<table><thead><tr><th>Product</th><th>Focus</th><th class="n">Price</th><th class="n">Stock</th><th>SKU</th></tr></thead><tbody>${
-    catalog.map(p=>{
-      const stock = p.inv==null?`<span class="pill info">Untracked</span>`: p.inv<=0?`<span class="pill bad">0 · Out</span>`: p.inv<=LOW_STOCK?`<span class="pill warn">${p.inv} · Low</span>`:`<span class="pill good">${p.inv}</span>`;
-      const skuOk = p.sku && p.sku.toUpperCase().startsWith(p.title.toUpperCase().slice(0,4));
-      const sku = !p.sku ? `<span class="pill bad">Missing</span>` : skuOk ? `<span class="mono">${esc(p.sku)}</span>` : `<span class="mono">${esc(p.sku)}</span> <span class="pill warn">Name mismatch</span>`;
-      return `<tr><td><strong>${esc(p.title)}</strong>${p.status!=="ACTIVE"?` <span class="pill warn">${esc(p.status.toLowerCase())}</span>`:""}</td><td class="muted">${focus(p)}*</td><td class="n">${fmtMoney(p.price)}</td><td class="n">${stock}</td><td>${sku}</td></tr>`;
-    }).join("")}</tbody></table>` : `<div class="empty">No products found in the catalog.</div>`;
+  // 03
+  $("c3a").textContent = int(orders); setD("c3aD", delta(orders,ordersPrev));
+  $("c3b").textContent = cvr==null ? "–" : pct(cvr,2);
+  $("c3c").textContent = money(rev); setD("c3cD", delta(rev,revPrev));
+  const steps = [["Search + AI Sessions","Organic search and AI-assistant visits",saSess],["Product-Page Entries","Landed directly on a product",prodEntries],["Added to Cart","Search + AI sessions with a cart add",saCart],["Orders","Completed checkouts",Math.max(saDone,orders)]];
+  $("funnel").innerHTML = steps.map(([t,s,v],i)=>`<div class="funnel-step"><div><strong>${t}</strong><small>${s}</small></div><div class="right"><b>${int(v)}</b><span>${i?pct(ratio(v,steps[i-1][2]),1):"100%"}</span></div></div>`).join("");
+  const conv = paths.filter(p=>p.done>0).sort((a,b)=>b.done-a.done);
+  $("convPages").innerHTML = conv.length ? `<table><thead><tr><th>Page</th><th class="n">Orders</th><th class="n">CVR</th></tr></thead><tbody>${conv.slice(0,6).map(p=>`<tr><td class="path">${esc(p.path)}</td><td class="n">${int(p.done)}</td><td class="n">${pct(ratio(p.done,p.s),1)}</td></tr>`).join("")}</tbody></table>`
+    : `<div class="empty">No orders from search or AI visitors in this period yet. Pages appear here, ranked by orders, after the first organic purchase.${passwordOn?" Checkout is unreachable for new visitors while the storefront password is on.":""}</div>`;
 
-  const checks = [
-    ["Storefront open to shoppers", !(pwShare>=.2), pwShare>=.2 ? `${fmtPct(pwShare,0)} of sessions hit /password` : "No password gate traffic"],
-    ["Add-to-cart tracking firing", !!cart, cart ? `${fmtInt(cart)} cart sessions` : "0 cart sessions recorded"],
-    ["Stock above "+LOW_STOCK+" units", !lowStock.length, lowStock.length ? lowStock.map(p=>`${p.title} (${p.inv})`).join(", ") : "All products"],
-    ["SKUs match product names", !skuIssues.length, skuIssues.length ? skuIssues.map(p=>`${p.title}: ${p.sku||"none"}`).join(", ") : "All match"],
-    ["Search Console connected", false, "Needed for impressions, CTR, rankings"],
-    ["GA4 connected", false, "Needed for engagement metrics"]
-  ];
-  $("checks").innerHTML = `<table><tbody>${checks.map(([t,ok,d])=>`<tr><td><strong>${t}</strong><br><span class="muted" style="font-size:12px">${esc(d)}</span></td><td class="n"><span class="pill ${ok?"good":"bad"}">${ok?"Pass":"Fix"}</span></td></tr>`).join("")}</tbody></table>`;
+  // 04
+  $("c4a").textContent = pct(ratio(seoOk,A.products.length),0); $("c4aPill").innerHTML = seoOk===A.products.length?pill("green","Healthy"):pill("amber","Gaps"); bar("c4aBar", ratio(seoOk,A.products.length));
+  $("c4b").textContent = pct(ratio(altOk,allAlts.length),0); $("c4bSub").textContent = `${altOk} of ${allAlts.length} product images${staleAlt.length?` · ${staleAlt.length} use an old name`:""}`;
+  $("c4bPill").innerHTML = altOk===allAlts.length && !staleAlt.length ? pill("green","Healthy") : pill("amber","Fix"); bar("c4bBar", ratio(altOk,allAlts.length), altOk===allAlts.length?"":"warn");
+  $("c4c").textContent = `${aeo}/${checks.length}`; $("c4cPill").innerHTML = aeo>=8?pill("green","Strong"):aeo>=6?pill("blue","On track"):pill("amber","Needs work"); bar("c4cBar", aeo/checks.length);
+  $("checks").innerHTML = `<table><tbody>${checks.map(([t,ok,d])=>`<tr><td><strong>${t}</strong><br><span class="mini">${esc(d)}</span></td><td class="n">${ok?pill("green","Pass"):pill("red","Fix")}</td></tr>`).join("")}</tbody></table>`;
+  $("topics").innerHTML = `<table><thead><tr><th>Topic</th><th class="n">Articles</th><th>Matching product</th><th>Fit</th></tr></thead><tbody>${topicCounts.map(t=>`<tr><td><strong>${t.label}</strong></td><td class="n">${t.n}</td><td>${t.product?esc(t.product)+"*":`<span class="mini">None in range</span>`}</td><td>${!t.product?pill("amber","No product"):t.n>=5?pill("green","Covered"):t.n?pill("blue","Thin"):pill("red","Gap")}</td></tr>`).join("")}</tbody></table><p class="mini" style="margin:12px 0 0">Last article published ${lastPub?new Date(lastPub+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"–"}${daysSince!=null?` (${daysSince} days ago)`:""}.${emptyPub.length?` Published pages with no content: ${emptyPub.map(h=>"/pages/"+h).join(", ")}.`:""}</p>`;
 
   // Insights
-  const working = searchSess
-    ? `Google already sends visitors (${fmtInt(searchSess)} search sessions this period) before launch, so the product names and domain are being found. ${cRows[0]?`${esc(cRows[0].session_country)} is the largest audience at ${fmtPct(ratio(num(cRows[0].sessions),sess),0)} of sessions.`:""}`
-    : `The catalog is live with ${catalog.length} active products, each tagged by focus area and full label transparency, so collection and search pages have clean structure to build on.`;
-  const blocker = pwShare>=.2
-    ? `The password page catches ${fmtPct(pwShare,0)} of visits and nobody has reached cart. Until the store opens, traffic changes cannot show up as sales.`
-    : !cart ? `Visitors arrive but none add to cart. Check product page clarity: dosing, ingredient sourcing and price per day.`
-    : `Drop-off between cart and checkout. Review shipping costs and checkout steps.`;
-  const next = pwShare>=.2
-    ? `Restock before opening (${lowStock.length} products are at ${LOW_STOCK} units or fewer), fix the ${skuIssues.length} SKU issue${skuIssues.length===1?"":"s"}, then remove the password and connect GA4 and Search Console so launch traffic is measured from day one.`
-    : `Connect GA4 and Search Console, then build content around each product's focus area to grow non-branded search traffic.`;
-  $("insights").innerHTML = [["k-good","What is working",working],["k-bad","Main blocker",blocker],["k-info","Next priority",next]]
-    .map(([c,h,p])=>`<div class="panel insight ${c}"><h4>${h}</h4><p>${p}</p></div>`).join("");
+  const hormone = topicCounts.find(t=>t.key==="hormone").n;
+  $("insights").innerHTML = [
+    ["What is Working", `The site already has the trust signals that answer engines look for: SEO titles and meta descriptions on every product, a medical and scientific board, a research library, a published clinical trial for Sololin, batch lab results and a machine-readable pricing page. ${org?`Google has sent ${int(org)} visits${ai?` and ChatGPT ${int(ai)}`:""} before launch.`:""}`],
+    ["Primary Opportunity", passwordOn ? `Removing the storefront password unlocks everything else. None of the ${int(indexable)} published URLs can be indexed or cited while it is on, so the ${pubArticles.length} articles have produced ${int(blogEntries)} search entries so far.` : `Articles drive ${int(blogEntries)} entries and product pages ${int(prodEntries)}. Internal links from articles to the matching topic hub and product would carry more of that traffic forward.`],
+    ["Next Priority", `${!pageOk("faq")?"Fill the FAQ page with question-and-answer content (dosing, timing, interactions, trial results), since AI assistants quote it directly. ":""}${sleepN>pubArticles.length/2?`Rebalance content: ${sleepN} of ${pubArticles.length} articles cover sleep, which no current product addresses, while hormonal balance has ${hormone}. `:""}${staleAlt.length?`Rename the ${staleAlt.length} old-name image alts on ${staleProducts.join(", ")}. `:""}${brokenLegacy.length?`Redirect ${brokenLegacy.map(h=>"/products/"+h).join(", ")}. `:""}Then connect Search Console and GA4.`]
+  ].map(([h,p])=>`<div class="insight"><h4>${h}</h4><p>${esc(p)}</p></div>`).join("");
 
-  // Section notes for failed refreshes
   ["n1","n2","n3","n4"].forEach(id=>$(id).textContent="");
-  Object.entries(errors).forEach(([key,msg])=>{ const id=SECTION_OF[key]; if(id && !$(id).textContent) $(id).textContent = msg; });
+  Object.entries(errors).forEach(([k,m])=>{ const id=NOTE_OF[k]; if(id && !$(id).textContent) $(id).textContent=m; });
 }
 
-function setStatus(s, text){ $("status").dataset.s = s; $("statusText").textContent = text; }
-function stamp(){ return lastUpdated ? new Date(lastUpdated).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : ""; }
-
+// ---- live data ----
+function setLive(s,t){ $("live").dataset.s=s; $("liveText").textContent=t; }
+const stamp = () => lastAt ? new Date(lastAt).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "";
 function errorCopy(e){
   switch(e && e.code){
-    case "needs_reauth": return "Reconnect Shopify in claude.ai Settings → Connectors to refresh.";
+    case "needs_reauth": return "Reconnect Shopify in claude.ai Settings → Connectors to refresh this section.";
     case "server_not_connected": return "Add the Shopify connector in claude.ai Settings → Connectors to see live data.";
     case "selection_required": return "Choose which Shopify connection to use when claude.ai asks.";
     case "not_in_manifest": return "Shopify access is turned off for this page.";
@@ -500,78 +506,56 @@ function errorCopy(e){
   }
 }
 const DENIAL = new Set(["needs_reauth","server_not_connected","selection_required","not_in_manifest","blocked_by_policy","approval_required","not_granted","capability_disabled","capability_removed"]);
-
-function parseTable(result){
-  const p = result && (result.payload ?? result.structuredContent);
-  if (p && Array.isArray(p.rows)) return {columns:(p.columns||[]).map(c=>typeof c==="string"?c:c.name), rows:p.rows};
-  return null;
+const payloadOf = r => r && (r.payload ?? r.structuredContent);
+function parseTable(r){ const p=payloadOf(r); return p && Array.isArray(p.rows) ? {columns:(p.columns||[]).map(c=>typeof c==="string"?c:c.name), rows:p.rows} : null; }
+function parseAudit(r){
+  const d = payloadOf(r); const q = d && (d.data || d);
+  if (!q || !q.products) return null;
+  return {
+    products:(q.products.nodes||[]).filter(p=>p.status==="ACTIVE").map(p=>({title:p.title,handle:p.handle,seo:!!(p.seo&&p.seo.title&&p.seo.description),alts:((p.media&&p.media.nodes)||[]).map(m=>m.alt||"")})),
+    pages:((q.pages&&q.pages.nodes)||[]).map(p=>({handle:p.handle,pub:!!p.isPublished,empty:!(p.bodySummary||"").trim()})),
+    articles:((q.articles&&q.articles.nodes)||[]).map(a=>({title:a.title,blog:a.blog&&a.blog.handle,pub:!!a.isPublished,at:(a.publishedAt||"").slice(0,10)})),
+    redirects:((q.urlRedirects&&q.urlRedirects.nodes)||[]).map(x=>x.path)
+  };
 }
-function parseCatalog(result){
-  const p = result && (result.payload ?? result.structuredContent);
-  const edges = p && p.data && p.data.products && p.data.products.edges;
-  if (!Array.isArray(edges)) return null;
-  return edges.map(({node:n})=>{
-    const v = (n.variants && n.variants.edges && n.variants.edges[0] && n.variants.edges[0].node) || {};
-    return {title:n.title, handle:n.handle, status:n.status, tags:n.tags||[], price:num(n.priceRangeV2 && n.priceRangeV2.minVariantPrice && n.priceRangeV2.minVariantPrice.amount), inv:num(n.totalInventory), sku:v.sku||""};
-  });
-}
-
-function handleEvent(key, ev){
-  if (ev.type === "data"){
-    const parsed = key==="catalog" ? parseCatalog(ev.result) : parseTable(ev.result);
-    if (!parsed){ errors[key] = "Shopify sent data in an unexpected shape."; render(); return; }
-    data[key] = parsed; delete errors[key];
-    const at = ev.result.cache ? ev.result.cache.storedAt : Date.now();
-    lastUpdated = Math.max(lastUpdated||0, at);
+function onEvent(key, ev){
+  if (ev.type==="data"){
+    const parsed = key==="audit" ? parseAudit(ev.result) : parseTable(ev.result);
+    if (!parsed){ errors[key]="Shopify sent data in an unexpected shape."; }
+    else { data[key]=parsed; delete errors[key]; lastAt=Math.max(lastAt||0, ev.result.cache?ev.result.cache.storedAt:Date.now()); }
   } else {
-    const code = ev.error && ev.error.code;
-    errors[key] = errorCopy(ev.error);
-    if (DENIAL.has(code)){ data[key] = key==="catalog" ? [] : {columns:[],rows:[]}; }
+    errors[key]=errorCopy(ev.error);
+    if (DENIAL.has(ev.error && ev.error.code)) data[key] = key==="audit" ? {products:[],pages:[],articles:[],redirects:[]} : {columns:[],rows:[]};
   }
-  const errKeys = Object.keys(errors);
-  if (!errKeys.length) setStatus("live", "Live from Shopify · "+stamp());
-  else if (errKeys.length >= 9) setStatus("bad", errors[errKeys[0]]);
-  else setStatus("warn", `Partly refreshed · ${stamp()||"snapshot"}`);
+  const ek=Object.keys(errors);
+  if (!ek.length) setLive("live","Live from Shopify · "+stamp());
+  else if (ek.length>=5) setLive("bad", errors[ek[0]]);
+  else setLive("warn","Partly refreshed · "+(stamp()||"snapshot"));
   render();
 }
-
 function watchAll(){
-  unsubs.forEach(u=>u()); unsubs = [];
+  unsubs.forEach(u=>u()); unsubs=[];
   if (!mcp) return;
-  const q = queries(period);
-  Object.entries(q).forEach(([key,query])=>{
-    unsubs.push(mcp.watchTool(SERVER, "run-analytics-query", {query}, ev=>handleEvent(key,ev), {refetchInterval:300000, cache:{staleTime:60000}}));
-  });
-  unsubs.push(mcp.watchTool(SERVER, "search_products", {first:50, search_summary:"Circady Health catalog"}, ev=>handleEvent("catalog",ev), {refetchInterval:600000, cache:{staleTime:120000}}));
+  Object.entries(queries(period)).forEach(([k,q])=>unsubs.push(mcp.watchTool(SERVER,"run-analytics-query",{query:q},ev=>onEvent(k,ev),{refetchInterval:300000,cache:{staleTime:60000}})));
+  unsubs.push(mcp.watchTool(SERVER,"graphql_query",{query:AUDIT_Q},ev=>onEvent("audit",ev),{refetchInterval:900000,cache:{staleTime:300000}}));
 }
-
 document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
-  if (b.dataset.p === period) return;
-  period = b.dataset.p;
-  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", String(x===b)));
+  if (b.dataset.p===period) return;
+  period=b.dataset.p;
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
   if (!mcp){
-    if (period !== "30"){ setStatus("warn","Live Shopify data is needed for the 90-day view"); }
-    else { data = structuredClone(SNAPSHOT); setStatus("snap","Snapshot from Oct 5, 2026"); render(); }
+    if (period==="90"){ data=structuredClone(SNAP); setLive("snap","Snapshot from Oct 5, 2026"); render(); }
+    else setLive("warn","The 30-day view needs live Shopify data");
     return;
   }
-  errors = {}; setStatus("snap","Loading "+b.textContent.toLowerCase()+"…");
-  watchAll();
+  errors={}; setLive("snap",`Loading last ${period} days…`); watchAll();
 }));
-$("refresh").addEventListener("click", async ()=>{
-  if (!mcp) return;
-  $("refresh").disabled = true;
-  try { await mcp.invalidate(SERVER); } catch(e) { watchAll(); }
-  setTimeout(()=>{$("refresh").disabled=false}, 3000);
-});
 
 render();
-$("refresh").disabled = true;
 if (window.claude && window.claude.use){
   window.claude.use("mcp").then(m=>{
-    if (!m){ setStatus("snap","Snapshot from Oct 5, 2026 · live data unavailable here"); return; }
-    mcp = m; $("refresh").disabled = false;
-    setStatus("snap","Connecting to Shopify…");
-    watchAll();
+    if (!m){ setLive("snap","Snapshot from Oct 5, 2026 · live data unavailable here"); return; }
+    mcp=m; setLive("snap","Connecting to Shopify…"); watchAll();
   }).catch(()=>{});
 }
 })();
