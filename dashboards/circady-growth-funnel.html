@@ -1,0 +1,578 @@
+<title>Circady Growth Funnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: operator dashboard read top to bottom as the purchase funnel (awareness → consideration → conversion → store health), summary first. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunken:#eef1f6; --ink:#121a2b; --muted:#5d6779; --line:#dde2ea;
+  --night:#2b3a7a; --night-soft:#e7eaf7; --dawn:#c26a12; --dawn-soft:#fbefe1;
+  --good:#1f7a4d; --good-soft:#e3f3ea; --bad:#b4322b; --bad-soft:#fbe7e5;
+  --bar:#4f5fb0; --bar-dim:#c3c9e6; --grid:#e6e9f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1320; --surface:#161c2c; --sunken:#1c2336; --ink:#e7eaf2; --muted:#98a1b5; --line:#283048;
+  --night:#9eabf0; --night-soft:#232c4d; --dawn:#f0a95a; --dawn-soft:#3a2a17;
+  --good:#5fcb94; --good-soft:#173326; --bad:#f08a82; --bad-soft:#3d1d1b;
+  --bar:#8291e0; --bar-dim:#3a4470; --grid:#232b40; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e1320; --surface:#161c2c; --sunken:#1c2336; --ink:#e7eaf2; --muted:#98a1b5; --line:#283048;
+  --night:#9eabf0; --night-soft:#232c4d; --dawn:#f0a95a; --dawn-soft:#3a2a17;
+  --good:#5fcb94; --good-soft:#173326; --bad:#f08a82; --bad-soft:#3d1d1b;
+  --bar:#8291e0; --bar-dim:#3a4470; --grid:#232b40; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.shell{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:28px 40px;display:grid;gap:22px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+.num,td.n,.mono{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono)}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--night)}
+.muted{color:var(--muted)}
+
+.topbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+.topbar h1{font-size:30px;line-height:1.1;margin-block:6px 6px}
+.topbar p{margin:0;color:var(--muted);max-width:62ch}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--night);color:var(--surface);font-weight:600}
+.seg button:focus-visible,.btn:focus-visible{outline:2px solid var(--night);outline-offset:2px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:10px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.status{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status[data-s="live"] .dot{background:var(--good)}
+.status[data-s="warn"] .dot{background:var(--dawn)}
+.status[data-s="bad"] .dot{background:var(--bad)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
+.exec{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+.hero h2{font-size:19px;margin-bottom:8px}
+.hero p{margin:0 0 16px;color:var(--muted);max-width:72ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.warn{background:var(--dawn-soft);color:var(--dawn)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.info{background:var(--night-soft);color:var(--night)}
+.headline .label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.headline .big{font-family:var(--f-display);font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-block:6px 2px}
+.delta{font-size:12px;font-weight:600}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.flat{color:var(--muted)}
+
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-family:var(--f-display);font-size:26px;font-weight:700;margin-block:6px 4px}
+.kpi .foot{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.src{font-family:var(--f-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+
+.stage{display:grid;gap:14px}
+.stage-head{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+.step{flex:none;width:34px;height:34px;border-radius:9px;background:var(--night-soft);color:var(--night);display:grid;place-items:center;font-family:var(--f-mono);font-weight:500;font-size:13px}
+.stage-head h2{font-size:20px}
+.stage-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.note{font-size:12px;color:var(--dawn);margin:4px 0 0}
+.note:empty{display:none}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.g21{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px}
+.panel h3{font-size:15px;margin-bottom:12px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.panel h3 .src{font-weight:400}
+
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:middle}
+th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+td.n,th.n{text-align:right}
+tr:last-child td{border-bottom:0}
+.share{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.share i{display:block;height:6px;border-radius:3px;background:var(--bar);min-width:2px}
+.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--dawn-soft);color:var(--dawn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--night-soft);color:var(--night)}
+.empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px;background:var(--sunken)}
+
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f-mono);font-size:10px;fill:var(--muted)}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+.funnel{display:grid;gap:8px}
+.fstep{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:10px;background:var(--sunken);position:relative;overflow:hidden}
+.fstep .fill{position:absolute;inset:0 auto 0 0;background:var(--night-soft);z-index:0}
+.fstep > *:not(.fill){position:relative;z-index:1}
+.fstep strong{font-size:13px}
+.fstep small{display:block;color:var(--muted);font-size:12px}
+.fstep .right{text-align:right}
+.fstep .right b{display:block;font-family:var(--f-display);font-size:19px}
+.fstep .right span{font-size:11px;color:var(--muted)}
+
+.mini-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mm{padding:12px;border-radius:10px;background:var(--sunken)}
+.mm .label{font-size:12px;color:var(--muted)}
+.mm .value{font-family:var(--f-display);font-size:22px;font-weight:700}
+
+.pending{border-style:dashed;background:var(--sunken)}
+.pending ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13px;display:grid;gap:3px}
+.pending p{margin:0;font-size:13px;color:var(--muted)}
+
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.insight h4{margin:0 0 6px;font-size:13px;font-family:var(--f-body);font-weight:600}
+.insight p{margin:0;color:var(--muted);font-size:13px}
+.insight.k-good{border-top:3px solid var(--good)}
+.insight.k-bad{border-top:3px solid var(--bad)}
+.insight.k-info{border-top:3px solid var(--night)}
+
+.foot{font-size:11px;color:var(--muted);display:grid;gap:6px;border-top:1px solid var(--line);padding-top:14px}
+.foot p{margin:0;max-width:110ch}
+
+@media (max-width:1100px){ .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} .g3,.insights{grid-template-columns:1fr} .g21{grid-template-columns:1fr} }
+@media (max-width:760px){ .shell{padding-inline:16px} .exec,.g2{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .topbar h1{font-size:25px} }
+@media (prefers-reduced-motion:no-preference){ .fstep .fill,.share i{transition:width .4s ease} }
+</style>
+
+<div class="shell">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Circady Health · circadyhealth.com</div>
+      <h1>Growth Funnel</h1>
+      <p>Store traffic, product interest and sales from Shopify, laid out from first visit to completed order. Search Console and GA4 panels fill in once those sources are connected.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Reporting period">
+        <button type="button" id="p30" data-p="30" aria-pressed="true">Last 30 days</button>
+        <button type="button" id="p90" data-p="90" aria-pressed="false">Last 90 days</button>
+      </div>
+      <button type="button" class="btn" id="refresh">Refresh</button>
+      <span class="status" id="status" data-s="snap"><span class="dot"></span><span id="statusText">Snapshot from Oct 5, 2026</span></span>
+    </div>
+  </header>
+
+  <section class="exec">
+    <div class="panel hero">
+      <h2>Summary</h2>
+      <p id="summaryText"></p>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="panel headline">
+      <div class="label">Orders this period</div>
+      <div class="big num" id="hOrders">–</div>
+      <div class="delta" id="hOrdersDelta"></div>
+      <p class="muted" style="margin:10px 0 0;font-size:13px" id="hSales"></p>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Key metrics"></section>
+
+  <!-- 01 Awareness -->
+  <section class="stage" aria-labelledby="s1">
+    <div class="stage-head"><div class="step">01</div><div><h2 id="s1">Awareness</h2><p>Where visitors come from and how many find the store.</p><p class="note" id="n1"></p></div></div>
+    <div class="g21">
+      <div class="panel chart">
+        <h3>Weekly sessions, last 12 weeks <span class="src">Shopify</span></h3>
+        <div id="trend"></div>
+        <div class="legend"><span><i style="background:var(--bar)"></i>Complete week</span><span><i style="background:var(--bar-dim)"></i>Week in progress</span></div>
+      </div>
+      <div class="panel">
+        <h3>Sessions by source <span class="src">Shopify</span></h3>
+        <div class="tablewrap" id="sources"></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="panel pending">
+        <h3>Organic search visibility <span class="pill warn">Search Console not connected</span></h3>
+        <p>Connect Google Search Console to fill this panel with:</p>
+        <ul><li>Impressions and clicks</li><li>Click-through rate and average position</li><li>Top queries, such as hormonal balance, blood sugar and gut health terms</li><li>Branded vs. non-branded click share</li></ul>
+      </div>
+      <div class="panel">
+        <h3>Sessions by country <span class="src">Shopify</span></h3>
+        <div class="tablewrap" id="countries"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Consideration -->
+  <section class="stage" aria-labelledby="s2">
+    <div class="stage-head"><div class="step">02</div><div><h2 id="s2">Consideration</h2><p>Which pages visitors land on and whether they reach the product range.</p><p class="note" id="n2"></p></div></div>
+    <div class="g3">
+      <div class="panel" style="grid-column:span 2;min-width:0">
+        <h3>Landing pages <span class="src">Shopify</span></h3>
+        <div class="tablewrap" id="landing"></div>
+      </div>
+      <div class="panel">
+        <h3>Device split <span class="src">Shopify</span></h3>
+        <div class="tablewrap" id="devices"></div>
+      </div>
+    </div>
+    <div class="panel pending">
+      <h3>On-site engagement <span class="pill warn">GA4 not connected</span></h3>
+      <p>Connect GA4 to add engagement rate, engaged sessions, average engagement time, product-page views per session, and the ingredient and research pages people read before buying.</p>
+    </div>
+  </section>
+
+  <!-- 03 Conversion -->
+  <section class="stage" aria-labelledby="s3">
+    <div class="stage-head"><div class="step">03</div><div><h2 id="s3">Conversion</h2><p>How sessions turn into carts, checkouts and orders.</p><p class="note" id="n3"></p></div></div>
+    <div class="g2">
+      <div class="panel">
+        <h3>Purchase funnel <span class="src">Shopify</span></h3>
+        <div class="funnel" id="funnel"></div>
+      </div>
+      <div class="panel">
+        <h3>Sales <span class="src">Shopify</span></h3>
+        <div class="mini-metrics" id="sales"></div>
+        <h3 style="margin-top:18px">Sales by product</h3>
+        <div class="tablewrap" id="productSales"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Store health -->
+  <section class="stage" aria-labelledby="s4">
+    <div class="stage-head"><div class="step">04</div><div><h2 id="s4">Store health</h2><p>Catalog, stock and setup checks that affect every stage above.</p><p class="note" id="n4"></p></div></div>
+    <div class="g21">
+      <div class="panel">
+        <h3>Catalog and stock <span class="src">Shopify</span></h3>
+        <div class="tablewrap" id="catalog"></div>
+      </div>
+      <div class="panel">
+        <h3>Setup checks</h3>
+        <div class="tablewrap" id="checks"></div>
+      </div>
+    </div>
+    <div class="insights" id="insights"></div>
+  </section>
+
+  <footer class="foot">
+    <p>Sources: Shopify Analytics (ShopifyQL) and the Shopify product catalog, read through your Shopify connector. Amounts are in USD, the store's currency. Each period is compared with the period of equal length before it.</p>
+    <p>*These statements have not been evaluated by the Food and Drug Administration. Circady Health products are not intended to diagnose, treat, cure, or prevent any disease.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+const SERVER = "Shopify";
+const CURRENCY = "USD";
+const LOW_STOCK = 10;
+
+// Snapshot read from Shopify on Oct 5, 2026 (last 30 days). Shown until live data loads.
+const SNAPSHOT = {
+  funnel:{columns:["sessions","online_store_visitors","sessions_with_cart_additions","sessions_that_reached_checkout","sessions_that_completed_checkout","conversion_rate","comparison_sessions__previous_period","comparison_online_store_visitors__previous_period","comparison_sessions_with_cart_additions__previous_period","comparison_sessions_that_reached_checkout__previous_period","comparison_sessions_that_completed_checkout__previous_period","comparison_conversion_rate__previous_period"],rows:[["156","142","0","0","0","0.0","557","551","0","0","0","0.0"]]},
+  sales:{columns:["orders","net_sales","average_order_value","new_customers","returning_customers","comparison_orders__previous_period","comparison_net_sales__previous_period","comparison_average_order_value__previous_period","comparison_new_customers__previous_period","comparison_returning_customers__previous_period"],rows:[["0","0","","0","0","0","0","","0","0"]]},
+  sources:{columns:["referrer_source","referrer_name","sessions"],rows:[["direct","","146"],["search","google","8"],["social","facebook","2"]]},
+  landing:{columns:["landing_page_path","sessions"],rows:[["/password","105"],["/","51"]]},
+  countries:{columns:["session_country","sessions"],rows:[["United States","123"],["Israel","12"],["Colombia","3"],["Argentina","3"],["Germany","2"],["Canada","2"]]},
+  devices:{columns:["session_device_type","sessions"],rows:[["desktop","139"],["mobile","17"]]},
+  products:{columns:[],rows:[]},
+  trend:{columns:["week","sessions"],rows:[["2026-07-13","49"],["2026-07-20","228"],["2026-07-27","319"],["2026-08-03","176"],["2026-08-10","314"],["2026-08-17","31"],["2026-08-24","50"],["2026-08-31","32"],["2026-09-07","77"],["2026-09-14","25"],["2026-09-21","9"],["2026-09-28","29"],["2026-10-05","3"]]},
+  catalog:[
+    {title:"Saracryn",handle:"saracryn",status:"ACTIVE",tags:["hormonal balance","female health"],price:105,inv:2,sku:"SARACRYN-001"},
+    {title:"Sololin",handle:"sololin",status:"ACTIVE",tags:["blood sugar support","metabolic health"],price:159,inv:3,sku:"SOLOLIN-001"},
+    {title:"Zavina",handle:"zavina",status:"ACTIVE",tags:["gut health","digestive support"],price:99,inv:5,sku:"AVRACALM-001"},
+    {title:"Muzanna",handle:"muzanna",status:"ACTIVE",tags:["metabolic health"],price:139,inv:2,sku:""}
+  ]
+};
+
+const RANGE = {30:"SINCE -30d UNTIL today", 90:"SINCE -90d UNTIL today"};
+const queries = p => ({
+  funnel:`FROM sessions SHOW sessions, online_store_visitors, sessions_with_cart_additions, sessions_that_reached_checkout, sessions_that_completed_checkout, conversion_rate ${RANGE[p]} COMPARE TO previous_period`,
+  sales:`FROM sales SHOW orders, net_sales, average_order_value, new_customers, returning_customers ${RANGE[p]} COMPARE TO previous_period`,
+  sources:`FROM sessions SHOW sessions GROUP BY referrer_source, referrer_name ${RANGE[p]} ORDER BY sessions DESC LIMIT 8`,
+  landing:`FROM sessions SHOW sessions GROUP BY landing_page_path ${RANGE[p]} ORDER BY sessions DESC LIMIT 8`,
+  countries:`FROM sessions SHOW sessions GROUP BY session_country ${RANGE[p]} ORDER BY sessions DESC LIMIT 6`,
+  devices:`FROM sessions SHOW sessions GROUP BY session_device_type ${RANGE[p]} ORDER BY sessions DESC`,
+  products:`FROM sales SHOW orders, net_sales GROUP BY product_title ${RANGE[p]} ORDER BY net_sales DESC LIMIT 8`,
+  trend:`FROM sessions SHOW sessions TIMESERIES week SINCE -84d UNTIL today`
+});
+const SECTION_OF = {funnel:"n3",sales:"n3",products:"n3",sources:"n1",countries:"n1",trend:"n1",landing:"n2",devices:"n2",catalog:"n4"};
+
+let period = "30";
+let data = structuredClone(SNAPSHOT);
+let errors = {};
+let lastUpdated = null;
+let mcp = null;
+let unsubs = [];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num = v => (v === "" || v == null || isNaN(+v)) ? null : +v;
+const fmtInt = v => v == null ? "–" : Math.round(v).toLocaleString("en-US");
+const fmtMoney = v => v == null ? "–" : new Intl.NumberFormat("en-US",{style:"currency",currency:CURRENCY,maximumFractionDigits:v>=1000?0:2}).format(v);
+const fmtPct = (v,d=1) => v == null ? "–" : (v*100).toFixed(d)+"%";
+const objs = t => (t && t.rows ? t.rows.map(r => Object.fromEntries((t.columns||[]).map((c,i)=>[typeof c==="string"?c:c.name, r[i]]))) : []);
+const first = t => objs(t)[0] || {};
+function delta(cur, prev){
+  if (cur == null || prev == null) return {cls:"flat", txt:"no comparison"};
+  if (prev === 0 && cur === 0) return {cls:"flat", txt:"no change"};
+  if (prev === 0) return {cls:"up", txt:"▲ new"};
+  const d = (cur-prev)/prev;
+  return {cls: d>0?"up":d<0?"down":"flat", txt:(d>0?"▲ ":d<0?"▼ ":"")+Math.abs(d*100).toFixed(1)+"% vs prior"};
+}
+const ratio = (a,b) => (a==null||!b) ? null : a/b;
+
+function shareTable(rows, labelFn, total, labelHead){
+  if (!rows.length) return `<div class="empty">No sessions recorded in this period.</div>`;
+  const max = Math.max(...rows.map(r=>num(r.sessions)||0), 1);
+  return `<table><thead><tr><th>${labelHead}</th><th class="n">Sessions</th><th class="n">Share</th></tr></thead><tbody>${
+    rows.map(r=>{const s=num(r.sessions)||0;return `<tr><td>${labelFn(r)}</td><td class="n">${fmtInt(s)}</td><td class="n"><div class="share"><i style="width:${Math.round(56*s/max)}px"></i>${fmtPct(ratio(s,total),0)}</div></td></tr>`}).join("")
+  }</tbody></table>`;
+}
+
+function trendSVG(t){
+  const rows = objs(t).map(r=>({w:r.week, s:num(r.sessions)||0}));
+  if (!rows.length) return `<div class="empty">No sessions recorded in the last 12 weeks.</div>`;
+  const W=640,H=220,L=36,R=8,T=12,B=28, iw=W-L-R, ih=H-T-B;
+  const maxV = Math.max(...rows.map(r=>r.s),1);
+  const step = [10,25,50,100,200,250,500,1000,2000,5000,10000].find(s=>maxV/s<=4) || Math.ceil(maxV/4);
+  const top = Math.ceil(maxV/step)*step;
+  const y = v => T + ih - (v/top)*ih;
+  const bw = iw/rows.length, gap = Math.min(10, bw*.3);
+  const today = new Date(); const weekMs = 7*864e5;
+  let g = "";
+  for (let v=0; v<=top; v+=step){ g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${v}</text>`; }
+  const every = rows.length > 8 ? 2 : 1;
+  rows.forEach((r,i)=>{
+    const d = new Date(r.w+"T00:00:00");
+    const partial = (today - d) < weekMs;
+    const x = L + i*bw + gap/2, h = Math.max(ih - (y(r.s)-T), r.s?1:0);
+    g += `<rect x="${x}" y="${y(r.s)}" width="${bw-gap}" height="${h}" rx="3" fill="${partial?'var(--bar-dim)':'var(--bar)'}"><title>Week of ${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}: ${r.s} sessions${partial?" (in progress)":""}</title></rect>`;
+    if (i%every===0 || i===rows.length-1) g += `<text x="${x+(bw-gap)/2}" y="${H-10}" text-anchor="middle">${d.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weekly sessions bar chart">${g}</svg>`;
+}
+
+function render(){
+  const f = first(data.funnel), s = first(data.sales);
+  const sess = num(f.sessions), prevSess = num(f.comparison_sessions__previous_period);
+  const vis = num(f.online_store_visitors), prevVis = num(f.comparison_online_store_visitors__previous_period);
+  const cart = num(f.sessions_with_cart_additions), prevCart = num(f.comparison_sessions_with_cart_additions__previous_period);
+  const chk = num(f.sessions_that_reached_checkout), done = num(f.sessions_that_completed_checkout);
+  const cvr = num(f.conversion_rate), prevCvr = num(f.comparison_conversion_rate__previous_period);
+  const orders = num(s.orders), prevOrders = num(s.comparison_orders__previous_period);
+  const net = num(s.net_sales), prevNet = num(s.comparison_net_sales__previous_period);
+  const aov = num(s.average_order_value);
+  const srcRows = objs(data.sources);
+  const searchSess = srcRows.filter(r=>r.referrer_source==="search").reduce((a,r)=>a+(num(r.sessions)||0),0);
+  const landRows = objs(data.landing);
+  const pwSess = landRows.filter(r=>r.landing_page_path==="/password").reduce((a,r)=>a+(num(r.sessions)||0),0);
+  const pwShare = ratio(pwSess, sess);
+  const catalog = data.catalog || [];
+  const lowStock = catalog.filter(p=>p.inv!=null && p.inv<=LOW_STOCK);
+  const skuIssues = catalog.filter(p=>!p.sku || !p.sku.toUpperCase().startsWith(p.title.toUpperCase().slice(0,4)));
+
+  // Headline
+  $("hOrders").textContent = fmtInt(orders);
+  const od = delta(orders, prevOrders); $("hOrdersDelta").className = "delta "+od.cls; $("hOrdersDelta").textContent = od.txt;
+  $("hSales").textContent = orders ? `${fmtMoney(net)} net sales · ${fmtMoney(aov)} average order` : "No orders have been placed in this period.";
+
+  // Summary
+  const sd = delta(sess, prevSess);
+  let summary;
+  if (pwShare != null && pwShare >= .2) {
+    summary = `${fmtPct(pwShare,0)} of sessions in this period landed on the storefront password page, and ${cart ? fmtInt(cart)+" sessions" : "no sessions"} added a product to the cart. The store is still behind its password, so the funnel stops at the front door. Removing the password is the step that unlocks every stage below. Traffic is ${sd.cls==="down"?"down":sd.cls==="up"?"up":"flat"} versus the prior period (${fmtInt(sess)} vs ${fmtInt(prevSess)} sessions).`;
+  } else if (!orders) {
+    summary = `${fmtInt(sess)} sessions this period and no orders yet. ${cart ? fmtInt(cart)+" sessions added to cart, so the drop-off sits between cart and checkout." : "No sessions added to cart, so product pages are the first place to look."}`;
+  } else {
+    summary = `${fmtInt(orders)} orders from ${fmtInt(sess)} sessions (${fmtPct(cvr/100,2)} conversion) and ${fmtMoney(net)} in net sales this period.`;
+  }
+  $("summaryText").textContent = summary;
+  const chips = [];
+  if (pwShare != null && pwShare >= .2) chips.push(["bad","Storefront password is on"]);
+  chips.push(cart ? ["good",`${fmtInt(cart)} cart sessions`] : ["warn","No add-to-cart activity"]);
+  chips.push([searchSess ? "info":"warn", `Search drives ${fmtPct(ratio(searchSess,sess),0)} of sessions`]);
+  if (lowStock.length) chips.push(["warn",`${lowStock.length} of ${catalog.length} products at ${LOW_STOCK} units or fewer`]);
+  $("chips").innerHTML = chips.map(([c,t])=>`<span class="chip ${c}">${esc(t)}</span>`).join("");
+
+  // KPIs
+  const k = [
+    ["Sessions", fmtInt(sess), delta(sess,prevSess)],
+    ["Visitors", fmtInt(vis), delta(vis,prevVis)],
+    ["Search sessions", fmtInt(searchSess), {cls:"flat",txt:fmtPct(ratio(searchSess,sess),1)+" of total"}],
+    ["Cart sessions", fmtInt(cart), delta(cart,prevCart)],
+    ["Conversion rate", cvr==null?"–":cvr.toFixed(2)+"%", cvr!=null&&prevCvr!=null?{cls:cvr>prevCvr?"up":cvr<prevCvr?"down":"flat",txt:(cvr-prevCvr).toFixed(2)+" pp vs prior"}:{cls:"flat",txt:""}],
+    ["Net sales", fmtMoney(net), delta(net,prevNet)]
+  ];
+  $("kpis").innerHTML = k.map(([l,v,d])=>`<div class="kpi"><div class="label">${l}</div><div class="value num">${v}</div><div class="foot"><span class="delta ${d.cls}">${esc(d.txt)}</span><span class="src">Shopify</span></div></div>`).join("");
+
+  // Awareness
+  $("trend").innerHTML = trendSVG(data.trend);
+  const srcLabel = r => `${esc(r.referrer_source ? r.referrer_source[0].toUpperCase()+r.referrer_source.slice(1) : "Unknown")}${r.referrer_name?` <span class="muted">· ${esc(r.referrer_name)}</span>`:""}`;
+  $("sources").innerHTML = shareTable(srcRows, srcLabel, sess, "Source");
+  const cRows = objs(data.countries);
+  $("countries").innerHTML = shareTable(cRows, r=>esc(r.session_country||"Unknown"), sess, "Country");
+
+  // Consideration
+  $("landing").innerHTML = landRows.length ? `<table><thead><tr><th>Landing page</th><th class="n">Sessions</th><th class="n">Share</th><th>Status</th></tr></thead><tbody>${
+    landRows.map(r=>{const v=num(r.sessions)||0;const p=r.landing_page_path||"";
+      const st = p==="/password" ? `<span class="pill bad">Password gate</span>` : p==="/" ? `<span class="pill info">Homepage</span>` : p.startsWith("/products/") ? `<span class="pill good">Product page</span>` : p.startsWith("/collections/") ? `<span class="pill good">Collection</span>` : p.startsWith("/blogs/") ? `<span class="pill info">Content</span>` : `<span class="pill info">Page</span>`;
+      return `<tr><td class="mono">${esc(p)}</td><td class="n">${fmtInt(v)}</td><td class="n">${fmtPct(ratio(v,sess),0)}</td><td>${st}</td></tr>`}).join("")
+  }</tbody></table>${landRows.some(r=>(r.landing_page_path||"").startsWith("/products/"))?"":`<p class="muted" style="font-size:12px;margin:10px 0 0">No sessions landed directly on a product page in this period.</p>`}` : `<div class="empty">No sessions recorded in this period.</div>`;
+  $("devices").innerHTML = shareTable(objs(data.devices), r=>esc((r.session_device_type||"other").replace(/^./,c=>c.toUpperCase())), sess, "Device");
+
+  // Conversion funnel
+  const steps = [
+    ["Sessions","Every visit to the store",sess],
+    ["Added to cart","Sessions with at least one product in the cart",cart],
+    ["Reached checkout","Sessions that opened checkout",chk],
+    ["Completed checkout","Sessions that placed an order",done]
+  ];
+  $("funnel").innerHTML = steps.map(([t,d,v],i)=>{
+    const ofTop = ratio(v,sess), ofPrev = i ? ratio(v, steps[i-1][2]) : 1;
+    return `<div class="fstep"><div class="fill" style="width:${Math.max(0,Math.min(100,(ofTop||0)*100))}%"></div><div><strong>${t}</strong><small>${d}</small></div><div class="right"><b class="num">${fmtInt(v)}</b><span>${i? (ofPrev==null?"– of previous step":fmtPct(ofPrev,1)+" of previous step") : "100%"}</span></div></div>`;
+  }).join("");
+  $("sales").innerHTML = [
+    ["Orders", fmtInt(orders)], ["Net sales", fmtMoney(net)],
+    ["Average order", aov==null?"–":fmtMoney(aov)], ["New / returning customers", `${fmtInt(num(s.new_customers))} / ${fmtInt(num(s.returning_customers))}`]
+  ].map(([l,v])=>`<div class="mm"><div class="label">${l}</div><div class="value num">${v}</div></div>`).join("");
+  const pRows = objs(data.products);
+  $("productSales").innerHTML = pRows.length ? `<table><thead><tr><th>Product</th><th class="n">Orders</th><th class="n">Net sales</th></tr></thead><tbody>${
+    pRows.map(r=>`<tr><td>${esc(r.product_title)}</td><td class="n">${fmtInt(num(r.orders))}</td><td class="n">${fmtMoney(num(r.net_sales))}</td></tr>`).join("")}</tbody></table>`
+    : `<div class="empty">No product sales in this period. Rows appear here after the first order.</div>`;
+
+  // Store health
+  const focus = p => {
+    const t = (p.tags||[]).map(x=>x.toLowerCase());
+    if (t.includes("hormonal balance")) return "Hormonal balance support";
+    if (t.includes("blood sugar support")) return "Blood sugar support";
+    if (t.includes("gut health")||t.includes("digestive support")) return "Digestive comfort support";
+    if (t.includes("metabolic health")) return "Metabolic health support";
+    return "Supplement";
+  };
+  $("catalog").innerHTML = catalog.length ? `<table><thead><tr><th>Product</th><th>Focus</th><th class="n">Price</th><th class="n">Stock</th><th>SKU</th></tr></thead><tbody>${
+    catalog.map(p=>{
+      const stock = p.inv==null?`<span class="pill info">Untracked</span>`: p.inv<=0?`<span class="pill bad">0 · Out</span>`: p.inv<=LOW_STOCK?`<span class="pill warn">${p.inv} · Low</span>`:`<span class="pill good">${p.inv}</span>`;
+      const skuOk = p.sku && p.sku.toUpperCase().startsWith(p.title.toUpperCase().slice(0,4));
+      const sku = !p.sku ? `<span class="pill bad">Missing</span>` : skuOk ? `<span class="mono">${esc(p.sku)}</span>` : `<span class="mono">${esc(p.sku)}</span> <span class="pill warn">Name mismatch</span>`;
+      return `<tr><td><strong>${esc(p.title)}</strong>${p.status!=="ACTIVE"?` <span class="pill warn">${esc(p.status.toLowerCase())}</span>`:""}</td><td class="muted">${focus(p)}*</td><td class="n">${fmtMoney(p.price)}</td><td class="n">${stock}</td><td>${sku}</td></tr>`;
+    }).join("")}</tbody></table>` : `<div class="empty">No products found in the catalog.</div>`;
+
+  const checks = [
+    ["Storefront open to shoppers", !(pwShare>=.2), pwShare>=.2 ? `${fmtPct(pwShare,0)} of sessions hit /password` : "No password gate traffic"],
+    ["Add-to-cart tracking firing", !!cart, cart ? `${fmtInt(cart)} cart sessions` : "0 cart sessions recorded"],
+    ["Stock above "+LOW_STOCK+" units", !lowStock.length, lowStock.length ? lowStock.map(p=>`${p.title} (${p.inv})`).join(", ") : "All products"],
+    ["SKUs match product names", !skuIssues.length, skuIssues.length ? skuIssues.map(p=>`${p.title}: ${p.sku||"none"}`).join(", ") : "All match"],
+    ["Search Console connected", false, "Needed for impressions, CTR, rankings"],
+    ["GA4 connected", false, "Needed for engagement metrics"]
+  ];
+  $("checks").innerHTML = `<table><tbody>${checks.map(([t,ok,d])=>`<tr><td><strong>${t}</strong><br><span class="muted" style="font-size:12px">${esc(d)}</span></td><td class="n"><span class="pill ${ok?"good":"bad"}">${ok?"Pass":"Fix"}</span></td></tr>`).join("")}</tbody></table>`;
+
+  // Insights
+  const working = searchSess
+    ? `Google already sends visitors (${fmtInt(searchSess)} search sessions this period) before launch, so the product names and domain are being found. ${cRows[0]?`${esc(cRows[0].session_country)} is the largest audience at ${fmtPct(ratio(num(cRows[0].sessions),sess),0)} of sessions.`:""}`
+    : `The catalog is live with ${catalog.length} active products, each tagged by focus area and full label transparency, so collection and search pages have clean structure to build on.`;
+  const blocker = pwShare>=.2
+    ? `The password page catches ${fmtPct(pwShare,0)} of visits and nobody has reached cart. Until the store opens, traffic changes cannot show up as sales.`
+    : !cart ? `Visitors arrive but none add to cart. Check product page clarity: dosing, ingredient sourcing and price per day.`
+    : `Drop-off between cart and checkout. Review shipping costs and checkout steps.`;
+  const next = pwShare>=.2
+    ? `Restock before opening (${lowStock.length} products are at ${LOW_STOCK} units or fewer), fix the ${skuIssues.length} SKU issue${skuIssues.length===1?"":"s"}, then remove the password and connect GA4 and Search Console so launch traffic is measured from day one.`
+    : `Connect GA4 and Search Console, then build content around each product's focus area to grow non-branded search traffic.`;
+  $("insights").innerHTML = [["k-good","What is working",working],["k-bad","Main blocker",blocker],["k-info","Next priority",next]]
+    .map(([c,h,p])=>`<div class="panel insight ${c}"><h4>${h}</h4><p>${p}</p></div>`).join("");
+
+  // Section notes for failed refreshes
+  ["n1","n2","n3","n4"].forEach(id=>$(id).textContent="");
+  Object.entries(errors).forEach(([key,msg])=>{ const id=SECTION_OF[key]; if(id && !$(id).textContent) $(id).textContent = msg; });
+}
+
+function setStatus(s, text){ $("status").dataset.s = s; $("statusText").textContent = text; }
+function stamp(){ return lastUpdated ? new Date(lastUpdated).toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : ""; }
+
+function errorCopy(e){
+  switch(e && e.code){
+    case "needs_reauth": return "Reconnect Shopify in claude.ai Settings → Connectors to refresh.";
+    case "server_not_connected": return "Add the Shopify connector in claude.ai Settings → Connectors to see live data.";
+    case "selection_required": return "Choose which Shopify connection to use when claude.ai asks.";
+    case "not_in_manifest": return "Shopify access is turned off for this page.";
+    case "blocked_by_policy": case "approval_required": return "Your organization's policy blocks this Shopify read.";
+    case "server_unavailable": return "Shopify didn't respond. Showing the last data that loaded.";
+    case "tool_error": return "Shopify returned an error: "+(e.message||"query failed");
+    default: return "Couldn't refresh from Shopify. Showing the last data that loaded.";
+  }
+}
+const DENIAL = new Set(["needs_reauth","server_not_connected","selection_required","not_in_manifest","blocked_by_policy","approval_required","not_granted","capability_disabled","capability_removed"]);
+
+function parseTable(result){
+  const p = result && (result.payload ?? result.structuredContent);
+  if (p && Array.isArray(p.rows)) return {columns:(p.columns||[]).map(c=>typeof c==="string"?c:c.name), rows:p.rows};
+  return null;
+}
+function parseCatalog(result){
+  const p = result && (result.payload ?? result.structuredContent);
+  const edges = p && p.data && p.data.products && p.data.products.edges;
+  if (!Array.isArray(edges)) return null;
+  return edges.map(({node:n})=>{
+    const v = (n.variants && n.variants.edges && n.variants.edges[0] && n.variants.edges[0].node) || {};
+    return {title:n.title, handle:n.handle, status:n.status, tags:n.tags||[], price:num(n.priceRangeV2 && n.priceRangeV2.minVariantPrice && n.priceRangeV2.minVariantPrice.amount), inv:num(n.totalInventory), sku:v.sku||""};
+  });
+}
+
+function handleEvent(key, ev){
+  if (ev.type === "data"){
+    const parsed = key==="catalog" ? parseCatalog(ev.result) : parseTable(ev.result);
+    if (!parsed){ errors[key] = "Shopify sent data in an unexpected shape."; render(); return; }
+    data[key] = parsed; delete errors[key];
+    const at = ev.result.cache ? ev.result.cache.storedAt : Date.now();
+    lastUpdated = Math.max(lastUpdated||0, at);
+  } else {
+    const code = ev.error && ev.error.code;
+    errors[key] = errorCopy(ev.error);
+    if (DENIAL.has(code)){ data[key] = key==="catalog" ? [] : {columns:[],rows:[]}; }
+  }
+  const errKeys = Object.keys(errors);
+  if (!errKeys.length) setStatus("live", "Live from Shopify · "+stamp());
+  else if (errKeys.length >= 9) setStatus("bad", errors[errKeys[0]]);
+  else setStatus("warn", `Partly refreshed · ${stamp()||"snapshot"}`);
+  render();
+}
+
+function watchAll(){
+  unsubs.forEach(u=>u()); unsubs = [];
+  if (!mcp) return;
+  const q = queries(period);
+  Object.entries(q).forEach(([key,query])=>{
+    unsubs.push(mcp.watchTool(SERVER, "run-analytics-query", {query}, ev=>handleEvent(key,ev), {refetchInterval:300000, cache:{staleTime:60000}}));
+  });
+  unsubs.push(mcp.watchTool(SERVER, "search_products", {first:50, search_summary:"Circady Health catalog"}, ev=>handleEvent("catalog",ev), {refetchInterval:600000, cache:{staleTime:120000}}));
+}
+
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+  if (b.dataset.p === period) return;
+  period = b.dataset.p;
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", String(x===b)));
+  if (!mcp){
+    if (period !== "30"){ setStatus("warn","Live Shopify data is needed for the 90-day view"); }
+    else { data = structuredClone(SNAPSHOT); setStatus("snap","Snapshot from Oct 5, 2026"); render(); }
+    return;
+  }
+  errors = {}; setStatus("snap","Loading "+b.textContent.toLowerCase()+"…");
+  watchAll();
+}));
+$("refresh").addEventListener("click", async ()=>{
+  if (!mcp) return;
+  $("refresh").disabled = true;
+  try { await mcp.invalidate(SERVER); } catch(e) { watchAll(); }
+  setTimeout(()=>{$("refresh").disabled=false}, 3000);
+});
+
+render();
+$("refresh").disabled = true;
+if (window.claude && window.claude.use){
+  window.claude.use("mcp").then(m=>{
+    if (!m){ setStatus("snap","Snapshot from Oct 5, 2026 · live data unavailable here"); return; }
+    mcp = m; $("refresh").disabled = false;
+    setStatus("snap","Connecting to Shopify…");
+    watchAll();
+  }).catch(()=>{});
+}
+})();
+</script>
